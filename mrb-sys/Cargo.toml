@@ -1,0 +1,11 @@
+[package]
+name = "mrb-sys"
+version = "0.0.0"
+authors = ["Charlie Somerville <charlie@charlie.bz>"]
+edition = "2018"
+links = "mruby"
+
+[dependencies]
+
+[build-dependencies]
+bindgen = "0.55"
