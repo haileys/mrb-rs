@@ -84,3 +84,73 @@ mrbrs_inspect(mrb_state* mrb, mrb_value obj, size_t* out_len)
 
     return result;
 }
+
+
+void mrbrs_method_free_boxed_func(mrb_state*, void*);
+mrb_value mrbrs_method_dispatch_boxed_func(mrb_state*, mrb_value);
+
+mrb_data_type
+mrbrs_method_boxed_func_data_type = {
+    .struct_name = "mrbrs::method::BoxedFunc",
+    .dfree = mrbrs_method_free_boxed_func,
+};
+
+struct RProc*
+mrbrs_method_make_boxed_func(mrb_state* mrb, void* boxed_func, struct RObject** out_exc)
+{
+    struct mrb_jmpbuf* prev_jmp = mrb->jmp;
+    struct mrb_jmpbuf jmp;
+    struct RProc* result = NULL;
+
+    MRB_TRY(&jmp) {
+        mrb->jmp = &jmp;
+
+        struct mrb_value data =
+            mrb_obj_value(
+                mrb_data_object_alloc(
+                    mrb,
+                    NULL,
+                    boxed_func,
+                    &mrbrs_method_boxed_func_data_type));
+
+        mrb_gc_protect(mrb, data);
+
+        result = mrb_proc_new_cfunc_with_env(
+            mrb,
+            mrbrs_method_dispatch_boxed_func,
+            1,
+            &data);
+
+        mrb_gc_protect(mrb, mrb_obj_value(result));
+
+        mrb->jmp = prev_jmp;
+    } MRB_CATCH(&jmp) {
+        *out_exc = mrb->exc;
+        mrb->jmp = prev_jmp;
+    } MRB_END_EXC(&jmp);
+
+    return result;
+}
+
+void
+mrbrs_define_method_proc(mrb_state* mrb, struct RClass* klass, const char* name, struct RProc* proc, struct RObject** out_exc)
+{
+    struct mrb_jmpbuf* prev_jmp = mrb->jmp;
+    struct mrb_jmpbuf jmp;
+    struct RProc* result = NULL;
+
+    MRB_TRY(&jmp) {
+        mrb->jmp = &jmp;
+
+        mrb_sym mid = mrb_intern_cstr(mrb, name);
+
+        mrb_method_t m;
+        MRB_METHOD_FROM_PROC(m, proc);
+        mrb_define_method_raw(mrb, klass, mid, m);
+
+        mrb->jmp = prev_jmp;
+    } MRB_CATCH(&jmp) {
+        *out_exc = mrb->exc;
+        mrb->jmp = prev_jmp;
+    } MRB_END_EXC(&jmp);
+}

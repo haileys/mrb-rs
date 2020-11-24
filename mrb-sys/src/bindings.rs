@@ -507,6 +507,33 @@ pub const MRUBY_BIRTH_YEAR: u32 = 2010;
 pub const MRUBY_AUTHOR: &'static [u8; 17usize] = b"mruby developers\0";
 pub const MRB_FIXED_STATE_ATEXIT_STACK_SIZE: u32 = 5;
 pub const MRB_METHOD_CACHE_SIZE: u32 = 128;
+pub const STR_FUNC_PARSING: u32 = 1;
+pub const STR_FUNC_EXPAND: u32 = 2;
+pub const STR_FUNC_REGEXP: u32 = 4;
+pub const STR_FUNC_WORD: u32 = 8;
+pub const STR_FUNC_SYMBOL: u32 = 16;
+pub const STR_FUNC_ARRAY: u32 = 32;
+pub const STR_FUNC_HEREDOC: u32 = 64;
+pub const STR_FUNC_XQUOTE: u32 = 128;
+pub const MRB_PARSER_TOKBUF_MAX: u32 = 65534;
+pub const MRB_PARSER_TOKBUF_SIZE: u32 = 256;
+pub const MRB_ISEQ_NO_FREE: u32 = 1;
+pub const MRB_ENV_CLOSED: u32 = 1048576;
+pub const MRB_ENV_TOUCHED: u32 = 524288;
+pub const MRB_ENV_HEAPED: u32 = 262144;
+pub const MRB_PROC_CFUNC_FL: u32 = 128;
+pub const MRB_PROC_STRICT: u32 = 256;
+pub const MRB_PROC_ORPHAN: u32 = 512;
+pub const MRB_PROC_ENVSET: u32 = 1024;
+pub const MRB_PROC_SCOPE: u32 = 2048;
+pub const MRB_METHOD_FUNC_FL: u32 = 1;
+pub const MRB_METHOD_NOARG_FL: u32 = 2;
+pub const _STRING_H: u32 = 1;
+pub const _BITS_TYPES_LOCALE_T_H: u32 = 1;
+pub const _BITS_TYPES___LOCALE_T_H: u32 = 1;
+pub const _STRINGS_H: u32 = 1;
+pub const KHASH_DEFAULT_SIZE: u32 = 32;
+pub const KHASH_MIN_SIZE: u32 = 8;
 pub const MRB_STR_SHARED: u32 = 1;
 pub const MRB_STR_FSHARED: u32 = 2;
 pub const MRB_STR_NOFREE: u32 = 4;
@@ -2571,11 +2598,6 @@ extern "C" {
 }
 pub type mrb_code = u8;
 pub type mrb_aspec = u32;
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct mrb_irep {
-    _unused: [u8; 0],
-}
 pub type mrb_allocf = ::std::option::Option<
     unsafe extern "C" fn(
         mrb: *mut mrb_state,
@@ -4080,6 +4102,2468 @@ extern "C" {
     pub fn mrb_format(mrb: *mut mrb_state, format: *const ::std::os::raw::c_char, ...)
         -> mrb_value;
 }
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct mrb_data_type {
+    pub struct_name: *const ::std::os::raw::c_char,
+    pub dfree: ::std::option::Option<
+        unsafe extern "C" fn(mrb: *mut mrb_state, arg1: *mut ::std::os::raw::c_void),
+    >,
+}
+#[test]
+fn bindgen_test_layout_mrb_data_type() {
+    assert_eq!(
+        ::std::mem::size_of::<mrb_data_type>(),
+        16usize,
+        concat!("Size of: ", stringify!(mrb_data_type))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<mrb_data_type>(),
+        8usize,
+        concat!("Alignment of ", stringify!(mrb_data_type))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_data_type>())).struct_name as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_data_type),
+            "::",
+            stringify!(struct_name)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_data_type>())).dfree as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_data_type),
+            "::",
+            stringify!(dfree)
+        )
+    );
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct RData {
+    pub c: *mut RClass,
+    pub gcnext: *mut RBasic,
+    pub _bitfield_1: __BindgenBitfieldUnit<[u8; 4usize], u32>,
+    pub iv: *mut iv_tbl,
+    pub type_: *const mrb_data_type,
+    pub data: *mut ::std::os::raw::c_void,
+}
+#[test]
+fn bindgen_test_layout_RData() {
+    assert_eq!(
+        ::std::mem::size_of::<RData>(),
+        48usize,
+        concat!("Size of: ", stringify!(RData))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<RData>(),
+        8usize,
+        concat!("Alignment of ", stringify!(RData))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<RData>())).c as *const _ as usize },
+        0usize,
+        concat!("Offset of field: ", stringify!(RData), "::", stringify!(c))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<RData>())).gcnext as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(RData),
+            "::",
+            stringify!(gcnext)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<RData>())).iv as *const _ as usize },
+        24usize,
+        concat!("Offset of field: ", stringify!(RData), "::", stringify!(iv))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<RData>())).type_ as *const _ as usize },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(RData),
+            "::",
+            stringify!(type_)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<RData>())).data as *const _ as usize },
+        40usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(RData),
+            "::",
+            stringify!(data)
+        )
+    );
+}
+impl RData {
+    #[inline]
+    pub fn tt(&self) -> mrb_vtype {
+        unsafe { ::std::mem::transmute(self._bitfield_1.get(0usize, 8u8) as u32) }
+    }
+    #[inline]
+    pub fn set_tt(&mut self, val: mrb_vtype) {
+        unsafe {
+            let val: u32 = ::std::mem::transmute(val);
+            self._bitfield_1.set(0usize, 8u8, val as u64)
+        }
+    }
+    #[inline]
+    pub fn color(&self) -> u32 {
+        unsafe { ::std::mem::transmute(self._bitfield_1.get(8usize, 3u8) as u32) }
+    }
+    #[inline]
+    pub fn set_color(&mut self, val: u32) {
+        unsafe {
+            let val: u32 = ::std::mem::transmute(val);
+            self._bitfield_1.set(8usize, 3u8, val as u64)
+        }
+    }
+    #[inline]
+    pub fn flags(&self) -> u32 {
+        unsafe { ::std::mem::transmute(self._bitfield_1.get(11usize, 21u8) as u32) }
+    }
+    #[inline]
+    pub fn set_flags(&mut self, val: u32) {
+        unsafe {
+            let val: u32 = ::std::mem::transmute(val);
+            self._bitfield_1.set(11usize, 21u8, val as u64)
+        }
+    }
+    #[inline]
+    pub fn new_bitfield_1(
+        tt: mrb_vtype,
+        color: u32,
+        flags: u32,
+    ) -> __BindgenBitfieldUnit<[u8; 4usize], u32> {
+        let mut __bindgen_bitfield_unit: __BindgenBitfieldUnit<[u8; 4usize], u32> =
+            Default::default();
+        __bindgen_bitfield_unit.set(0usize, 8u8, {
+            let tt: u32 = unsafe { ::std::mem::transmute(tt) };
+            tt as u64
+        });
+        __bindgen_bitfield_unit.set(8usize, 3u8, {
+            let color: u32 = unsafe { ::std::mem::transmute(color) };
+            color as u64
+        });
+        __bindgen_bitfield_unit.set(11usize, 21u8, {
+            let flags: u32 = unsafe { ::std::mem::transmute(flags) };
+            flags as u64
+        });
+        __bindgen_bitfield_unit
+    }
+}
+extern "C" {
+    pub fn mrb_data_object_alloc(
+        mrb: *mut mrb_state,
+        klass: *mut RClass,
+        datap: *mut ::std::os::raw::c_void,
+        type_: *const mrb_data_type,
+    ) -> *mut RData;
+}
+extern "C" {
+    pub fn mrb_data_check_type(mrb: *mut mrb_state, arg1: mrb_value, arg2: *const mrb_data_type);
+}
+extern "C" {
+    pub fn mrb_data_get_ptr(
+        mrb: *mut mrb_state,
+        arg1: mrb_value,
+        arg2: *const mrb_data_type,
+    ) -> *mut ::std::os::raw::c_void;
+}
+extern "C" {
+    pub fn mrb_data_check_get_ptr(
+        mrb: *mut mrb_state,
+        arg1: mrb_value,
+        arg2: *const mrb_data_type,
+    ) -> *mut ::std::os::raw::c_void;
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct mrbc_context {
+    pub syms: *mut mrb_sym,
+    pub slen: ::std::os::raw::c_int,
+    pub filename: *mut ::std::os::raw::c_char,
+    pub lineno: u16,
+    pub partial_hook: ::std::option::Option<
+        unsafe extern "C" fn(arg1: *mut mrb_parser_state) -> ::std::os::raw::c_int,
+    >,
+    pub partial_data: *mut ::std::os::raw::c_void,
+    pub target_class: *mut RClass,
+    pub _bitfield_1: __BindgenBitfieldUnit<[u8; 1usize], u8>,
+    pub upper: *mut RProc,
+    pub parser_nerr: size_t,
+}
+#[test]
+fn bindgen_test_layout_mrbc_context() {
+    assert_eq!(
+        ::std::mem::size_of::<mrbc_context>(),
+        80usize,
+        concat!("Size of: ", stringify!(mrbc_context))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<mrbc_context>(),
+        8usize,
+        concat!("Alignment of ", stringify!(mrbc_context))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrbc_context>())).syms as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrbc_context),
+            "::",
+            stringify!(syms)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrbc_context>())).slen as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrbc_context),
+            "::",
+            stringify!(slen)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrbc_context>())).filename as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrbc_context),
+            "::",
+            stringify!(filename)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrbc_context>())).lineno as *const _ as usize },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrbc_context),
+            "::",
+            stringify!(lineno)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrbc_context>())).partial_hook as *const _ as usize },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrbc_context),
+            "::",
+            stringify!(partial_hook)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrbc_context>())).partial_data as *const _ as usize },
+        40usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrbc_context),
+            "::",
+            stringify!(partial_data)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrbc_context>())).target_class as *const _ as usize },
+        48usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrbc_context),
+            "::",
+            stringify!(target_class)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrbc_context>())).upper as *const _ as usize },
+        64usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrbc_context),
+            "::",
+            stringify!(upper)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrbc_context>())).parser_nerr as *const _ as usize },
+        72usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrbc_context),
+            "::",
+            stringify!(parser_nerr)
+        )
+    );
+}
+impl mrbc_context {
+    #[inline]
+    pub fn capture_errors(&self) -> mrb_bool {
+        unsafe { ::std::mem::transmute(self._bitfield_1.get(0usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_capture_errors(&mut self, val: mrb_bool) {
+        unsafe {
+            let val: u8 = ::std::mem::transmute(val);
+            self._bitfield_1.set(0usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub fn dump_result(&self) -> mrb_bool {
+        unsafe { ::std::mem::transmute(self._bitfield_1.get(1usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_dump_result(&mut self, val: mrb_bool) {
+        unsafe {
+            let val: u8 = ::std::mem::transmute(val);
+            self._bitfield_1.set(1usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub fn no_exec(&self) -> mrb_bool {
+        unsafe { ::std::mem::transmute(self._bitfield_1.get(2usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_no_exec(&mut self, val: mrb_bool) {
+        unsafe {
+            let val: u8 = ::std::mem::transmute(val);
+            self._bitfield_1.set(2usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub fn keep_lv(&self) -> mrb_bool {
+        unsafe { ::std::mem::transmute(self._bitfield_1.get(3usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_keep_lv(&mut self, val: mrb_bool) {
+        unsafe {
+            let val: u8 = ::std::mem::transmute(val);
+            self._bitfield_1.set(3usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub fn no_optimize(&self) -> mrb_bool {
+        unsafe { ::std::mem::transmute(self._bitfield_1.get(4usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_no_optimize(&mut self, val: mrb_bool) {
+        unsafe {
+            let val: u8 = ::std::mem::transmute(val);
+            self._bitfield_1.set(4usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub fn new_bitfield_1(
+        capture_errors: mrb_bool,
+        dump_result: mrb_bool,
+        no_exec: mrb_bool,
+        keep_lv: mrb_bool,
+        no_optimize: mrb_bool,
+    ) -> __BindgenBitfieldUnit<[u8; 1usize], u8> {
+        let mut __bindgen_bitfield_unit: __BindgenBitfieldUnit<[u8; 1usize], u8> =
+            Default::default();
+        __bindgen_bitfield_unit.set(0usize, 1u8, {
+            let capture_errors: u8 = unsafe { ::std::mem::transmute(capture_errors) };
+            capture_errors as u64
+        });
+        __bindgen_bitfield_unit.set(1usize, 1u8, {
+            let dump_result: u8 = unsafe { ::std::mem::transmute(dump_result) };
+            dump_result as u64
+        });
+        __bindgen_bitfield_unit.set(2usize, 1u8, {
+            let no_exec: u8 = unsafe { ::std::mem::transmute(no_exec) };
+            no_exec as u64
+        });
+        __bindgen_bitfield_unit.set(3usize, 1u8, {
+            let keep_lv: u8 = unsafe { ::std::mem::transmute(keep_lv) };
+            keep_lv as u64
+        });
+        __bindgen_bitfield_unit.set(4usize, 1u8, {
+            let no_optimize: u8 = unsafe { ::std::mem::transmute(no_optimize) };
+            no_optimize as u64
+        });
+        __bindgen_bitfield_unit
+    }
+}
+extern "C" {
+    pub fn mrbc_context_new(mrb: *mut mrb_state) -> *mut mrbc_context;
+}
+extern "C" {
+    pub fn mrbc_context_free(mrb: *mut mrb_state, cxt: *mut mrbc_context);
+}
+extern "C" {
+    pub fn mrbc_filename(
+        mrb: *mut mrb_state,
+        c: *mut mrbc_context,
+        s: *const ::std::os::raw::c_char,
+    ) -> *const ::std::os::raw::c_char;
+}
+extern "C" {
+    pub fn mrbc_partial_hook(
+        mrb: *mut mrb_state,
+        c: *mut mrbc_context,
+        partial_hook: ::std::option::Option<
+            unsafe extern "C" fn(arg1: *mut mrb_parser_state) -> ::std::os::raw::c_int,
+        >,
+        data: *mut ::std::os::raw::c_void,
+    );
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct mrb_ast_node {
+    pub car: *mut mrb_ast_node,
+    pub cdr: *mut mrb_ast_node,
+    pub lineno: u16,
+    pub filename_index: u16,
+}
+#[test]
+fn bindgen_test_layout_mrb_ast_node() {
+    assert_eq!(
+        ::std::mem::size_of::<mrb_ast_node>(),
+        24usize,
+        concat!("Size of: ", stringify!(mrb_ast_node))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<mrb_ast_node>(),
+        8usize,
+        concat!("Alignment of ", stringify!(mrb_ast_node))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_ast_node>())).car as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_ast_node),
+            "::",
+            stringify!(car)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_ast_node>())).cdr as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_ast_node),
+            "::",
+            stringify!(cdr)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_ast_node>())).lineno as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_ast_node),
+            "::",
+            stringify!(lineno)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_ast_node>())).filename_index as *const _ as usize },
+        18usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_ast_node),
+            "::",
+            stringify!(filename_index)
+        )
+    );
+}
+pub const mrb_lex_state_enum_EXPR_BEG: mrb_lex_state_enum = 0;
+pub const mrb_lex_state_enum_EXPR_END: mrb_lex_state_enum = 1;
+pub const mrb_lex_state_enum_EXPR_ENDARG: mrb_lex_state_enum = 2;
+pub const mrb_lex_state_enum_EXPR_ENDFN: mrb_lex_state_enum = 3;
+pub const mrb_lex_state_enum_EXPR_ARG: mrb_lex_state_enum = 4;
+pub const mrb_lex_state_enum_EXPR_CMDARG: mrb_lex_state_enum = 5;
+pub const mrb_lex_state_enum_EXPR_MID: mrb_lex_state_enum = 6;
+pub const mrb_lex_state_enum_EXPR_FNAME: mrb_lex_state_enum = 7;
+pub const mrb_lex_state_enum_EXPR_DOT: mrb_lex_state_enum = 8;
+pub const mrb_lex_state_enum_EXPR_CLASS: mrb_lex_state_enum = 9;
+pub const mrb_lex_state_enum_EXPR_VALUE: mrb_lex_state_enum = 10;
+pub const mrb_lex_state_enum_EXPR_MAX_STATE: mrb_lex_state_enum = 11;
+pub type mrb_lex_state_enum = ::std::os::raw::c_uint;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct mrb_parser_message {
+    pub lineno: u16,
+    pub column: ::std::os::raw::c_int,
+    pub message: *mut ::std::os::raw::c_char,
+}
+#[test]
+fn bindgen_test_layout_mrb_parser_message() {
+    assert_eq!(
+        ::std::mem::size_of::<mrb_parser_message>(),
+        16usize,
+        concat!("Size of: ", stringify!(mrb_parser_message))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<mrb_parser_message>(),
+        8usize,
+        concat!("Alignment of ", stringify!(mrb_parser_message))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_message>())).lineno as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_message),
+            "::",
+            stringify!(lineno)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_message>())).column as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_message),
+            "::",
+            stringify!(column)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_message>())).message as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_message),
+            "::",
+            stringify!(message)
+        )
+    );
+}
+pub const mrb_string_type_str_not_parsing: mrb_string_type = 0;
+pub const mrb_string_type_str_squote: mrb_string_type = 1;
+pub const mrb_string_type_str_dquote: mrb_string_type = 3;
+pub const mrb_string_type_str_regexp: mrb_string_type = 7;
+pub const mrb_string_type_str_sword: mrb_string_type = 41;
+pub const mrb_string_type_str_dword: mrb_string_type = 43;
+pub const mrb_string_type_str_ssym: mrb_string_type = 17;
+pub const mrb_string_type_str_ssymbols: mrb_string_type = 49;
+pub const mrb_string_type_str_dsymbols: mrb_string_type = 51;
+pub const mrb_string_type_str_heredoc: mrb_string_type = 65;
+pub const mrb_string_type_str_xquote: mrb_string_type = 131;
+pub type mrb_string_type = ::std::os::raw::c_uint;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct mrb_parser_heredoc_info {
+    pub _bitfield_1: __BindgenBitfieldUnit<[u8; 1usize], u8>,
+    pub type_: mrb_string_type,
+    pub term: *const ::std::os::raw::c_char,
+    pub term_len: ::std::os::raw::c_int,
+    pub doc: *mut mrb_ast_node,
+}
+#[test]
+fn bindgen_test_layout_mrb_parser_heredoc_info() {
+    assert_eq!(
+        ::std::mem::size_of::<mrb_parser_heredoc_info>(),
+        32usize,
+        concat!("Size of: ", stringify!(mrb_parser_heredoc_info))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<mrb_parser_heredoc_info>(),
+        8usize,
+        concat!("Alignment of ", stringify!(mrb_parser_heredoc_info))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_heredoc_info>())).type_ as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_heredoc_info),
+            "::",
+            stringify!(type_)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_heredoc_info>())).term as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_heredoc_info),
+            "::",
+            stringify!(term)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<mrb_parser_heredoc_info>())).term_len as *const _ as usize
+        },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_heredoc_info),
+            "::",
+            stringify!(term_len)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_heredoc_info>())).doc as *const _ as usize },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_heredoc_info),
+            "::",
+            stringify!(doc)
+        )
+    );
+}
+impl mrb_parser_heredoc_info {
+    #[inline]
+    pub fn allow_indent(&self) -> mrb_bool {
+        unsafe { ::std::mem::transmute(self._bitfield_1.get(0usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_allow_indent(&mut self, val: mrb_bool) {
+        unsafe {
+            let val: u8 = ::std::mem::transmute(val);
+            self._bitfield_1.set(0usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub fn line_head(&self) -> mrb_bool {
+        unsafe { ::std::mem::transmute(self._bitfield_1.get(1usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_line_head(&mut self, val: mrb_bool) {
+        unsafe {
+            let val: u8 = ::std::mem::transmute(val);
+            self._bitfield_1.set(1usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub fn new_bitfield_1(
+        allow_indent: mrb_bool,
+        line_head: mrb_bool,
+    ) -> __BindgenBitfieldUnit<[u8; 1usize], u8> {
+        let mut __bindgen_bitfield_unit: __BindgenBitfieldUnit<[u8; 1usize], u8> =
+            Default::default();
+        __bindgen_bitfield_unit.set(0usize, 1u8, {
+            let allow_indent: u8 = unsafe { ::std::mem::transmute(allow_indent) };
+            allow_indent as u64
+        });
+        __bindgen_bitfield_unit.set(1usize, 1u8, {
+            let line_head: u8 = unsafe { ::std::mem::transmute(line_head) };
+            line_head as u64
+        });
+        __bindgen_bitfield_unit
+    }
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct mrb_parser_state {
+    pub mrb: *mut mrb_state,
+    pub pool: *mut mrb_pool,
+    pub cells: *mut mrb_ast_node,
+    pub s: *const ::std::os::raw::c_char,
+    pub send: *const ::std::os::raw::c_char,
+    pub f: *mut FILE,
+    pub cxt: *mut mrbc_context,
+    pub filename_sym: mrb_sym,
+    pub lineno: u16,
+    pub column: ::std::os::raw::c_int,
+    pub lstate: mrb_lex_state_enum,
+    pub lex_strterm: *mut mrb_ast_node,
+    pub cond_stack: ::std::os::raw::c_uint,
+    pub cmdarg_stack: ::std::os::raw::c_uint,
+    pub paren_nest: ::std::os::raw::c_int,
+    pub lpar_beg: ::std::os::raw::c_int,
+    pub in_def: ::std::os::raw::c_int,
+    pub in_single: ::std::os::raw::c_int,
+    pub _bitfield_1: __BindgenBitfieldUnit<[u8; 1usize], u8>,
+    pub locals: *mut mrb_ast_node,
+    pub pb: *mut mrb_ast_node,
+    pub tokbuf: *mut ::std::os::raw::c_char,
+    pub buf: [::std::os::raw::c_char; 256usize],
+    pub tidx: ::std::os::raw::c_int,
+    pub tsiz: ::std::os::raw::c_int,
+    pub all_heredocs: *mut mrb_ast_node,
+    pub heredocs_from_nextline: *mut mrb_ast_node,
+    pub parsing_heredoc: *mut mrb_ast_node,
+    pub lex_strterm_before_heredoc: *mut mrb_ast_node,
+    pub ylval: *mut ::std::os::raw::c_void,
+    pub nerr: size_t,
+    pub nwarn: size_t,
+    pub tree: *mut mrb_ast_node,
+    pub _bitfield_2: __BindgenBitfieldUnit<[u8; 1usize], u8>,
+    pub upper: *mut RProc,
+    pub error_buffer: [mrb_parser_message; 10usize],
+    pub warn_buffer: [mrb_parser_message; 10usize],
+    pub filename_table: *mut mrb_sym,
+    pub filename_table_length: u16,
+    pub current_filename_index: u16,
+    pub jmp: *mut mrb_jmpbuf,
+    pub nvars: *mut mrb_ast_node,
+}
+#[test]
+fn bindgen_test_layout_mrb_parser_state() {
+    assert_eq!(
+        ::std::mem::size_of::<mrb_parser_state>(),
+        832usize,
+        concat!("Size of: ", stringify!(mrb_parser_state))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<mrb_parser_state>(),
+        8usize,
+        concat!("Alignment of ", stringify!(mrb_parser_state))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_state>())).mrb as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(mrb)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_state>())).pool as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(pool)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_state>())).cells as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(cells)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_state>())).s as *const _ as usize },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(s)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_state>())).send as *const _ as usize },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(send)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_state>())).f as *const _ as usize },
+        40usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(f)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_state>())).cxt as *const _ as usize },
+        48usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(cxt)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_state>())).filename_sym as *const _ as usize },
+        56usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(filename_sym)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_state>())).lineno as *const _ as usize },
+        60usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(lineno)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_state>())).column as *const _ as usize },
+        64usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(column)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_state>())).lstate as *const _ as usize },
+        68usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(lstate)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_state>())).lex_strterm as *const _ as usize },
+        72usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(lex_strterm)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_state>())).cond_stack as *const _ as usize },
+        80usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(cond_stack)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_state>())).cmdarg_stack as *const _ as usize },
+        84usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(cmdarg_stack)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_state>())).paren_nest as *const _ as usize },
+        88usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(paren_nest)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_state>())).lpar_beg as *const _ as usize },
+        92usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(lpar_beg)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_state>())).in_def as *const _ as usize },
+        96usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(in_def)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_state>())).in_single as *const _ as usize },
+        100usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(in_single)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_state>())).locals as *const _ as usize },
+        112usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(locals)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_state>())).pb as *const _ as usize },
+        120usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(pb)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_state>())).tokbuf as *const _ as usize },
+        128usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(tokbuf)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_state>())).buf as *const _ as usize },
+        136usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(buf)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_state>())).tidx as *const _ as usize },
+        392usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(tidx)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_state>())).tsiz as *const _ as usize },
+        396usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(tsiz)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_state>())).all_heredocs as *const _ as usize },
+        400usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(all_heredocs)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<mrb_parser_state>())).heredocs_from_nextline as *const _ as usize
+        },
+        408usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(heredocs_from_nextline)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<mrb_parser_state>())).parsing_heredoc as *const _ as usize
+        },
+        416usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(parsing_heredoc)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<mrb_parser_state>())).lex_strterm_before_heredoc as *const _
+                as usize
+        },
+        424usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(lex_strterm_before_heredoc)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_state>())).ylval as *const _ as usize },
+        432usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(ylval)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_state>())).nerr as *const _ as usize },
+        440usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(nerr)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_state>())).nwarn as *const _ as usize },
+        448usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(nwarn)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_state>())).tree as *const _ as usize },
+        456usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(tree)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_state>())).upper as *const _ as usize },
+        472usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(upper)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_state>())).error_buffer as *const _ as usize },
+        480usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(error_buffer)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_state>())).warn_buffer as *const _ as usize },
+        640usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(warn_buffer)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_state>())).filename_table as *const _ as usize },
+        800usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(filename_table)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<mrb_parser_state>())).filename_table_length as *const _ as usize
+        },
+        808usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(filename_table_length)
+        )
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<mrb_parser_state>())).current_filename_index as *const _ as usize
+        },
+        810usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(current_filename_index)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_state>())).jmp as *const _ as usize },
+        816usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(jmp)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_parser_state>())).nvars as *const _ as usize },
+        824usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_parser_state),
+            "::",
+            stringify!(nvars)
+        )
+    );
+}
+impl mrb_parser_state {
+    #[inline]
+    pub fn cmd_start(&self) -> mrb_bool {
+        unsafe { ::std::mem::transmute(self._bitfield_1.get(0usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_cmd_start(&mut self, val: mrb_bool) {
+        unsafe {
+            let val: u8 = ::std::mem::transmute(val);
+            self._bitfield_1.set(0usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub fn new_bitfield_1(cmd_start: mrb_bool) -> __BindgenBitfieldUnit<[u8; 1usize], u8> {
+        let mut __bindgen_bitfield_unit: __BindgenBitfieldUnit<[u8; 1usize], u8> =
+            Default::default();
+        __bindgen_bitfield_unit.set(0usize, 1u8, {
+            let cmd_start: u8 = unsafe { ::std::mem::transmute(cmd_start) };
+            cmd_start as u64
+        });
+        __bindgen_bitfield_unit
+    }
+    #[inline]
+    pub fn no_optimize(&self) -> mrb_bool {
+        unsafe { ::std::mem::transmute(self._bitfield_2.get(0usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_no_optimize(&mut self, val: mrb_bool) {
+        unsafe {
+            let val: u8 = ::std::mem::transmute(val);
+            self._bitfield_2.set(0usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub fn capture_errors(&self) -> mrb_bool {
+        unsafe { ::std::mem::transmute(self._bitfield_2.get(1usize, 1u8) as u8) }
+    }
+    #[inline]
+    pub fn set_capture_errors(&mut self, val: mrb_bool) {
+        unsafe {
+            let val: u8 = ::std::mem::transmute(val);
+            self._bitfield_2.set(1usize, 1u8, val as u64)
+        }
+    }
+    #[inline]
+    pub fn new_bitfield_2(
+        no_optimize: mrb_bool,
+        capture_errors: mrb_bool,
+    ) -> __BindgenBitfieldUnit<[u8; 1usize], u8> {
+        let mut __bindgen_bitfield_unit: __BindgenBitfieldUnit<[u8; 1usize], u8> =
+            Default::default();
+        __bindgen_bitfield_unit.set(0usize, 1u8, {
+            let no_optimize: u8 = unsafe { ::std::mem::transmute(no_optimize) };
+            no_optimize as u64
+        });
+        __bindgen_bitfield_unit.set(1usize, 1u8, {
+            let capture_errors: u8 = unsafe { ::std::mem::transmute(capture_errors) };
+            capture_errors as u64
+        });
+        __bindgen_bitfield_unit
+    }
+}
+extern "C" {
+    pub fn mrb_parser_new(arg1: *mut mrb_state) -> *mut mrb_parser_state;
+}
+extern "C" {
+    pub fn mrb_parser_free(arg1: *mut mrb_parser_state);
+}
+extern "C" {
+    pub fn mrb_parser_parse(arg1: *mut mrb_parser_state, arg2: *mut mrbc_context);
+}
+extern "C" {
+    pub fn mrb_parser_set_filename(
+        arg1: *mut mrb_parser_state,
+        arg2: *const ::std::os::raw::c_char,
+    );
+}
+extern "C" {
+    pub fn mrb_parser_get_filename(arg1: *mut mrb_parser_state, idx: u16) -> mrb_sym;
+}
+extern "C" {
+    pub fn mrb_parse_file(
+        arg1: *mut mrb_state,
+        arg2: *mut FILE,
+        arg3: *mut mrbc_context,
+    ) -> *mut mrb_parser_state;
+}
+extern "C" {
+    pub fn mrb_parse_string(
+        arg1: *mut mrb_state,
+        arg2: *const ::std::os::raw::c_char,
+        arg3: *mut mrbc_context,
+    ) -> *mut mrb_parser_state;
+}
+extern "C" {
+    pub fn mrb_parse_nstring(
+        arg1: *mut mrb_state,
+        arg2: *const ::std::os::raw::c_char,
+        arg3: size_t,
+        arg4: *mut mrbc_context,
+    ) -> *mut mrb_parser_state;
+}
+extern "C" {
+    pub fn mrb_generate_code(arg1: *mut mrb_state, arg2: *mut mrb_parser_state) -> *mut RProc;
+}
+extern "C" {
+    pub fn mrb_load_exec(
+        mrb: *mut mrb_state,
+        p: *mut mrb_parser_state,
+        c: *mut mrbc_context,
+    ) -> mrb_value;
+}
+extern "C" {
+    pub fn mrb_load_file(arg1: *mut mrb_state, arg2: *mut FILE) -> mrb_value;
+}
+extern "C" {
+    pub fn mrb_load_file_cxt(
+        arg1: *mut mrb_state,
+        arg2: *mut FILE,
+        cxt: *mut mrbc_context,
+    ) -> mrb_value;
+}
+extern "C" {
+    pub fn mrb_load_string(mrb: *mut mrb_state, s: *const ::std::os::raw::c_char) -> mrb_value;
+}
+extern "C" {
+    pub fn mrb_load_nstring(
+        mrb: *mut mrb_state,
+        s: *const ::std::os::raw::c_char,
+        len: size_t,
+    ) -> mrb_value;
+}
+extern "C" {
+    pub fn mrb_load_string_cxt(
+        mrb: *mut mrb_state,
+        s: *const ::std::os::raw::c_char,
+        cxt: *mut mrbc_context,
+    ) -> mrb_value;
+}
+extern "C" {
+    pub fn mrb_load_nstring_cxt(
+        mrb: *mut mrb_state,
+        s: *const ::std::os::raw::c_char,
+        len: size_t,
+        cxt: *mut mrbc_context,
+    ) -> mrb_value;
+}
+pub const irep_pool_type_IREP_TT_STRING: irep_pool_type = 0;
+pub const irep_pool_type_IREP_TT_FIXNUM: irep_pool_type = 1;
+pub const irep_pool_type_IREP_TT_FLOAT: irep_pool_type = 2;
+pub type irep_pool_type = ::std::os::raw::c_uint;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct mrb_locals {
+    pub name: mrb_sym,
+    pub r: u16,
+}
+#[test]
+fn bindgen_test_layout_mrb_locals() {
+    assert_eq!(
+        ::std::mem::size_of::<mrb_locals>(),
+        8usize,
+        concat!("Size of: ", stringify!(mrb_locals))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<mrb_locals>(),
+        4usize,
+        concat!("Alignment of ", stringify!(mrb_locals))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_locals>())).name as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_locals),
+            "::",
+            stringify!(name)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_locals>())).r as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_locals),
+            "::",
+            stringify!(r)
+        )
+    );
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct mrb_irep {
+    pub nlocals: u16,
+    pub nregs: u16,
+    pub flags: u8,
+    pub iseq: *const mrb_code,
+    pub pool: *mut mrb_value,
+    pub syms: *mut mrb_sym,
+    pub reps: *mut *mut mrb_irep,
+    pub lv: *mut mrb_locals,
+    pub debug_info: *mut mrb_irep_debug_info,
+    pub ilen: u16,
+    pub plen: u16,
+    pub slen: u16,
+    pub rlen: u16,
+    pub refcnt: u32,
+}
+#[test]
+fn bindgen_test_layout_mrb_irep() {
+    assert_eq!(
+        ::std::mem::size_of::<mrb_irep>(),
+        72usize,
+        concat!("Size of: ", stringify!(mrb_irep))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<mrb_irep>(),
+        8usize,
+        concat!("Alignment of ", stringify!(mrb_irep))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_irep>())).nlocals as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_irep),
+            "::",
+            stringify!(nlocals)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_irep>())).nregs as *const _ as usize },
+        2usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_irep),
+            "::",
+            stringify!(nregs)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_irep>())).flags as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_irep),
+            "::",
+            stringify!(flags)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_irep>())).iseq as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_irep),
+            "::",
+            stringify!(iseq)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_irep>())).pool as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_irep),
+            "::",
+            stringify!(pool)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_irep>())).syms as *const _ as usize },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_irep),
+            "::",
+            stringify!(syms)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_irep>())).reps as *const _ as usize },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_irep),
+            "::",
+            stringify!(reps)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_irep>())).lv as *const _ as usize },
+        40usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_irep),
+            "::",
+            stringify!(lv)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_irep>())).debug_info as *const _ as usize },
+        48usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_irep),
+            "::",
+            stringify!(debug_info)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_irep>())).ilen as *const _ as usize },
+        56usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_irep),
+            "::",
+            stringify!(ilen)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_irep>())).plen as *const _ as usize },
+        58usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_irep),
+            "::",
+            stringify!(plen)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_irep>())).slen as *const _ as usize },
+        60usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_irep),
+            "::",
+            stringify!(slen)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_irep>())).rlen as *const _ as usize },
+        62usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_irep),
+            "::",
+            stringify!(rlen)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_irep>())).refcnt as *const _ as usize },
+        64usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_irep),
+            "::",
+            stringify!(refcnt)
+        )
+    );
+}
+extern "C" {
+    pub fn mrb_add_irep(mrb: *mut mrb_state) -> *mut mrb_irep;
+}
+extern "C" {
+    pub fn mrb_load_irep(arg1: *mut mrb_state, arg2: *const u8) -> mrb_value;
+}
+extern "C" {
+    pub fn mrb_load_irep_buf(
+        arg1: *mut mrb_state,
+        arg2: *const ::std::os::raw::c_void,
+        arg3: size_t,
+    ) -> mrb_value;
+}
+extern "C" {
+    pub fn mrb_load_irep_cxt(
+        arg1: *mut mrb_state,
+        arg2: *const u8,
+        arg3: *mut mrbc_context,
+    ) -> mrb_value;
+}
+extern "C" {
+    pub fn mrb_load_irep_buf_cxt(
+        arg1: *mut mrb_state,
+        arg2: *const ::std::os::raw::c_void,
+        arg3: size_t,
+        arg4: *mut mrbc_context,
+    ) -> mrb_value;
+}
+extern "C" {
+    pub fn mrb_irep_free(arg1: *mut mrb_state, arg2: *mut mrb_irep);
+}
+extern "C" {
+    pub fn mrb_irep_incref(arg1: *mut mrb_state, arg2: *mut mrb_irep);
+}
+extern "C" {
+    pub fn mrb_irep_decref(arg1: *mut mrb_state, arg2: *mut mrb_irep);
+}
+extern "C" {
+    pub fn mrb_irep_cutref(arg1: *mut mrb_state, arg2: *mut mrb_irep);
+}
+extern "C" {
+    pub fn mrb_irep_remove_lv(mrb: *mut mrb_state, irep: *mut mrb_irep);
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct mrb_insn_data {
+    pub insn: u8,
+    pub a: u16,
+    pub b: u16,
+    pub c: u8,
+}
+#[test]
+fn bindgen_test_layout_mrb_insn_data() {
+    assert_eq!(
+        ::std::mem::size_of::<mrb_insn_data>(),
+        8usize,
+        concat!("Size of: ", stringify!(mrb_insn_data))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<mrb_insn_data>(),
+        2usize,
+        concat!("Alignment of ", stringify!(mrb_insn_data))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_insn_data>())).insn as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_insn_data),
+            "::",
+            stringify!(insn)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_insn_data>())).a as *const _ as usize },
+        2usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_insn_data),
+            "::",
+            stringify!(a)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_insn_data>())).b as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_insn_data),
+            "::",
+            stringify!(b)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<mrb_insn_data>())).c as *const _ as usize },
+        6usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(mrb_insn_data),
+            "::",
+            stringify!(c)
+        )
+    );
+}
+extern "C" {
+    pub fn mrb_decode_insn(pc: *const mrb_code) -> mrb_insn_data;
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct REnv {
+    pub c: *mut RClass,
+    pub gcnext: *mut RBasic,
+    pub _bitfield_1: __BindgenBitfieldUnit<[u8; 4usize], u32>,
+    pub stack: *mut mrb_value,
+    pub cxt: *mut mrb_context,
+    pub mid: mrb_sym,
+}
+#[test]
+fn bindgen_test_layout_REnv() {
+    assert_eq!(
+        ::std::mem::size_of::<REnv>(),
+        48usize,
+        concat!("Size of: ", stringify!(REnv))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<REnv>(),
+        8usize,
+        concat!("Alignment of ", stringify!(REnv))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<REnv>())).c as *const _ as usize },
+        0usize,
+        concat!("Offset of field: ", stringify!(REnv), "::", stringify!(c))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<REnv>())).gcnext as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(REnv),
+            "::",
+            stringify!(gcnext)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<REnv>())).stack as *const _ as usize },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(REnv),
+            "::",
+            stringify!(stack)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<REnv>())).cxt as *const _ as usize },
+        32usize,
+        concat!("Offset of field: ", stringify!(REnv), "::", stringify!(cxt))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<REnv>())).mid as *const _ as usize },
+        40usize,
+        concat!("Offset of field: ", stringify!(REnv), "::", stringify!(mid))
+    );
+}
+impl REnv {
+    #[inline]
+    pub fn tt(&self) -> mrb_vtype {
+        unsafe { ::std::mem::transmute(self._bitfield_1.get(0usize, 8u8) as u32) }
+    }
+    #[inline]
+    pub fn set_tt(&mut self, val: mrb_vtype) {
+        unsafe {
+            let val: u32 = ::std::mem::transmute(val);
+            self._bitfield_1.set(0usize, 8u8, val as u64)
+        }
+    }
+    #[inline]
+    pub fn color(&self) -> u32 {
+        unsafe { ::std::mem::transmute(self._bitfield_1.get(8usize, 3u8) as u32) }
+    }
+    #[inline]
+    pub fn set_color(&mut self, val: u32) {
+        unsafe {
+            let val: u32 = ::std::mem::transmute(val);
+            self._bitfield_1.set(8usize, 3u8, val as u64)
+        }
+    }
+    #[inline]
+    pub fn flags(&self) -> u32 {
+        unsafe { ::std::mem::transmute(self._bitfield_1.get(11usize, 21u8) as u32) }
+    }
+    #[inline]
+    pub fn set_flags(&mut self, val: u32) {
+        unsafe {
+            let val: u32 = ::std::mem::transmute(val);
+            self._bitfield_1.set(11usize, 21u8, val as u64)
+        }
+    }
+    #[inline]
+    pub fn new_bitfield_1(
+        tt: mrb_vtype,
+        color: u32,
+        flags: u32,
+    ) -> __BindgenBitfieldUnit<[u8; 4usize], u32> {
+        let mut __bindgen_bitfield_unit: __BindgenBitfieldUnit<[u8; 4usize], u32> =
+            Default::default();
+        __bindgen_bitfield_unit.set(0usize, 8u8, {
+            let tt: u32 = unsafe { ::std::mem::transmute(tt) };
+            tt as u64
+        });
+        __bindgen_bitfield_unit.set(8usize, 3u8, {
+            let color: u32 = unsafe { ::std::mem::transmute(color) };
+            color as u64
+        });
+        __bindgen_bitfield_unit.set(11usize, 21u8, {
+            let flags: u32 = unsafe { ::std::mem::transmute(flags) };
+            flags as u64
+        });
+        __bindgen_bitfield_unit
+    }
+}
+extern "C" {
+    pub fn mrb_env_unshare(arg1: *mut mrb_state, arg2: *mut REnv);
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub struct RProc {
+    pub c: *mut RClass,
+    pub gcnext: *mut RBasic,
+    pub _bitfield_1: __BindgenBitfieldUnit<[u8; 4usize], u32>,
+    pub body: RProc__bindgen_ty_1,
+    pub upper: *mut RProc,
+    pub e: RProc__bindgen_ty_2,
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub union RProc__bindgen_ty_1 {
+    pub irep: *mut mrb_irep,
+    pub func: mrb_func_t,
+    _bindgen_union_align: u64,
+}
+#[test]
+fn bindgen_test_layout_RProc__bindgen_ty_1() {
+    assert_eq!(
+        ::std::mem::size_of::<RProc__bindgen_ty_1>(),
+        8usize,
+        concat!("Size of: ", stringify!(RProc__bindgen_ty_1))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<RProc__bindgen_ty_1>(),
+        8usize,
+        concat!("Alignment of ", stringify!(RProc__bindgen_ty_1))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<RProc__bindgen_ty_1>())).irep as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(RProc__bindgen_ty_1),
+            "::",
+            stringify!(irep)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<RProc__bindgen_ty_1>())).func as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(RProc__bindgen_ty_1),
+            "::",
+            stringify!(func)
+        )
+    );
+}
+#[repr(C)]
+#[derive(Copy, Clone)]
+pub union RProc__bindgen_ty_2 {
+    pub target_class: *mut RClass,
+    pub env: *mut REnv,
+    _bindgen_union_align: u64,
+}
+#[test]
+fn bindgen_test_layout_RProc__bindgen_ty_2() {
+    assert_eq!(
+        ::std::mem::size_of::<RProc__bindgen_ty_2>(),
+        8usize,
+        concat!("Size of: ", stringify!(RProc__bindgen_ty_2))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<RProc__bindgen_ty_2>(),
+        8usize,
+        concat!("Alignment of ", stringify!(RProc__bindgen_ty_2))
+    );
+    assert_eq!(
+        unsafe {
+            &(*(::std::ptr::null::<RProc__bindgen_ty_2>())).target_class as *const _ as usize
+        },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(RProc__bindgen_ty_2),
+            "::",
+            stringify!(target_class)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<RProc__bindgen_ty_2>())).env as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(RProc__bindgen_ty_2),
+            "::",
+            stringify!(env)
+        )
+    );
+}
+#[test]
+fn bindgen_test_layout_RProc() {
+    assert_eq!(
+        ::std::mem::size_of::<RProc>(),
+        48usize,
+        concat!("Size of: ", stringify!(RProc))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<RProc>(),
+        8usize,
+        concat!("Alignment of ", stringify!(RProc))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<RProc>())).c as *const _ as usize },
+        0usize,
+        concat!("Offset of field: ", stringify!(RProc), "::", stringify!(c))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<RProc>())).gcnext as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(RProc),
+            "::",
+            stringify!(gcnext)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<RProc>())).body as *const _ as usize },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(RProc),
+            "::",
+            stringify!(body)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<RProc>())).upper as *const _ as usize },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(RProc),
+            "::",
+            stringify!(upper)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<RProc>())).e as *const _ as usize },
+        40usize,
+        concat!("Offset of field: ", stringify!(RProc), "::", stringify!(e))
+    );
+}
+impl RProc {
+    #[inline]
+    pub fn tt(&self) -> mrb_vtype {
+        unsafe { ::std::mem::transmute(self._bitfield_1.get(0usize, 8u8) as u32) }
+    }
+    #[inline]
+    pub fn set_tt(&mut self, val: mrb_vtype) {
+        unsafe {
+            let val: u32 = ::std::mem::transmute(val);
+            self._bitfield_1.set(0usize, 8u8, val as u64)
+        }
+    }
+    #[inline]
+    pub fn color(&self) -> u32 {
+        unsafe { ::std::mem::transmute(self._bitfield_1.get(8usize, 3u8) as u32) }
+    }
+    #[inline]
+    pub fn set_color(&mut self, val: u32) {
+        unsafe {
+            let val: u32 = ::std::mem::transmute(val);
+            self._bitfield_1.set(8usize, 3u8, val as u64)
+        }
+    }
+    #[inline]
+    pub fn flags(&self) -> u32 {
+        unsafe { ::std::mem::transmute(self._bitfield_1.get(11usize, 21u8) as u32) }
+    }
+    #[inline]
+    pub fn set_flags(&mut self, val: u32) {
+        unsafe {
+            let val: u32 = ::std::mem::transmute(val);
+            self._bitfield_1.set(11usize, 21u8, val as u64)
+        }
+    }
+    #[inline]
+    pub fn new_bitfield_1(
+        tt: mrb_vtype,
+        color: u32,
+        flags: u32,
+    ) -> __BindgenBitfieldUnit<[u8; 4usize], u32> {
+        let mut __bindgen_bitfield_unit: __BindgenBitfieldUnit<[u8; 4usize], u32> =
+            Default::default();
+        __bindgen_bitfield_unit.set(0usize, 8u8, {
+            let tt: u32 = unsafe { ::std::mem::transmute(tt) };
+            tt as u64
+        });
+        __bindgen_bitfield_unit.set(8usize, 3u8, {
+            let color: u32 = unsafe { ::std::mem::transmute(color) };
+            color as u64
+        });
+        __bindgen_bitfield_unit.set(11usize, 21u8, {
+            let flags: u32 = unsafe { ::std::mem::transmute(flags) };
+            flags as u64
+        });
+        __bindgen_bitfield_unit
+    }
+}
+extern "C" {
+    pub fn mrb_proc_new(arg1: *mut mrb_state, arg2: *mut mrb_irep) -> *mut RProc;
+}
+extern "C" {
+    pub fn mrb_closure_new(arg1: *mut mrb_state, arg2: *mut mrb_irep) -> *mut RProc;
+}
+extern "C" {
+    pub fn mrb_proc_new_cfunc(arg1: *mut mrb_state, arg2: mrb_func_t) -> *mut RProc;
+}
+extern "C" {
+    pub fn mrb_closure_new_cfunc(
+        mrb: *mut mrb_state,
+        func: mrb_func_t,
+        nlocals: ::std::os::raw::c_int,
+    ) -> *mut RProc;
+}
+extern "C" {
+    pub fn mrb_proc_copy(a: *mut RProc, b: *mut RProc);
+}
+extern "C" {
+    pub fn mrb_proc_arity(p: *const RProc) -> mrb_int;
+}
+extern "C" {
+    pub fn mrb_f_send(mrb: *mut mrb_state, self_: mrb_value) -> mrb_value;
+}
+extern "C" {
+    pub fn mrb_proc_new_cfunc_with_env(
+        mrb: *mut mrb_state,
+        func: mrb_func_t,
+        argc: mrb_int,
+        argv: *const mrb_value,
+    ) -> *mut RProc;
+}
+extern "C" {
+    pub fn mrb_proc_cfunc_env_get(mrb: *mut mrb_state, idx: mrb_int) -> mrb_value;
+}
+extern "C" {
+    pub fn memcpy(
+        __dest: *mut ::std::os::raw::c_void,
+        __src: *const ::std::os::raw::c_void,
+        __n: ::std::os::raw::c_ulong,
+    ) -> *mut ::std::os::raw::c_void;
+}
+extern "C" {
+    pub fn memmove(
+        __dest: *mut ::std::os::raw::c_void,
+        __src: *const ::std::os::raw::c_void,
+        __n: ::std::os::raw::c_ulong,
+    ) -> *mut ::std::os::raw::c_void;
+}
+extern "C" {
+    pub fn memccpy(
+        __dest: *mut ::std::os::raw::c_void,
+        __src: *const ::std::os::raw::c_void,
+        __c: ::std::os::raw::c_int,
+        __n: ::std::os::raw::c_ulong,
+    ) -> *mut ::std::os::raw::c_void;
+}
+extern "C" {
+    pub fn memset(
+        __s: *mut ::std::os::raw::c_void,
+        __c: ::std::os::raw::c_int,
+        __n: ::std::os::raw::c_ulong,
+    ) -> *mut ::std::os::raw::c_void;
+}
+extern "C" {
+    pub fn memcmp(
+        __s1: *const ::std::os::raw::c_void,
+        __s2: *const ::std::os::raw::c_void,
+        __n: ::std::os::raw::c_ulong,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn memchr(
+        __s: *const ::std::os::raw::c_void,
+        __c: ::std::os::raw::c_int,
+        __n: ::std::os::raw::c_ulong,
+    ) -> *mut ::std::os::raw::c_void;
+}
+extern "C" {
+    pub fn strcpy(
+        __dest: *mut ::std::os::raw::c_char,
+        __src: *const ::std::os::raw::c_char,
+    ) -> *mut ::std::os::raw::c_char;
+}
+extern "C" {
+    pub fn strncpy(
+        __dest: *mut ::std::os::raw::c_char,
+        __src: *const ::std::os::raw::c_char,
+        __n: ::std::os::raw::c_ulong,
+    ) -> *mut ::std::os::raw::c_char;
+}
+extern "C" {
+    pub fn strcat(
+        __dest: *mut ::std::os::raw::c_char,
+        __src: *const ::std::os::raw::c_char,
+    ) -> *mut ::std::os::raw::c_char;
+}
+extern "C" {
+    pub fn strncat(
+        __dest: *mut ::std::os::raw::c_char,
+        __src: *const ::std::os::raw::c_char,
+        __n: ::std::os::raw::c_ulong,
+    ) -> *mut ::std::os::raw::c_char;
+}
+extern "C" {
+    pub fn strcmp(
+        __s1: *const ::std::os::raw::c_char,
+        __s2: *const ::std::os::raw::c_char,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn strncmp(
+        __s1: *const ::std::os::raw::c_char,
+        __s2: *const ::std::os::raw::c_char,
+        __n: ::std::os::raw::c_ulong,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn strcoll(
+        __s1: *const ::std::os::raw::c_char,
+        __s2: *const ::std::os::raw::c_char,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn strxfrm(
+        __dest: *mut ::std::os::raw::c_char,
+        __src: *const ::std::os::raw::c_char,
+        __n: ::std::os::raw::c_ulong,
+    ) -> ::std::os::raw::c_ulong;
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct __locale_struct {
+    pub __locales: [*mut __locale_data; 13usize],
+    pub __ctype_b: *const ::std::os::raw::c_ushort,
+    pub __ctype_tolower: *const ::std::os::raw::c_int,
+    pub __ctype_toupper: *const ::std::os::raw::c_int,
+    pub __names: [*const ::std::os::raw::c_char; 13usize],
+}
+#[test]
+fn bindgen_test_layout___locale_struct() {
+    assert_eq!(
+        ::std::mem::size_of::<__locale_struct>(),
+        232usize,
+        concat!("Size of: ", stringify!(__locale_struct))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<__locale_struct>(),
+        8usize,
+        concat!("Alignment of ", stringify!(__locale_struct))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<__locale_struct>())).__locales as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(__locale_struct),
+            "::",
+            stringify!(__locales)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<__locale_struct>())).__ctype_b as *const _ as usize },
+        104usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(__locale_struct),
+            "::",
+            stringify!(__ctype_b)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<__locale_struct>())).__ctype_tolower as *const _ as usize },
+        112usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(__locale_struct),
+            "::",
+            stringify!(__ctype_tolower)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<__locale_struct>())).__ctype_toupper as *const _ as usize },
+        120usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(__locale_struct),
+            "::",
+            stringify!(__ctype_toupper)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<__locale_struct>())).__names as *const _ as usize },
+        128usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(__locale_struct),
+            "::",
+            stringify!(__names)
+        )
+    );
+}
+pub type __locale_t = *mut __locale_struct;
+pub type locale_t = __locale_t;
+extern "C" {
+    pub fn strcoll_l(
+        __s1: *const ::std::os::raw::c_char,
+        __s2: *const ::std::os::raw::c_char,
+        __l: locale_t,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn strxfrm_l(
+        __dest: *mut ::std::os::raw::c_char,
+        __src: *const ::std::os::raw::c_char,
+        __n: size_t,
+        __l: locale_t,
+    ) -> size_t;
+}
+extern "C" {
+    pub fn strdup(__s: *const ::std::os::raw::c_char) -> *mut ::std::os::raw::c_char;
+}
+extern "C" {
+    pub fn strndup(
+        __string: *const ::std::os::raw::c_char,
+        __n: ::std::os::raw::c_ulong,
+    ) -> *mut ::std::os::raw::c_char;
+}
+extern "C" {
+    pub fn strchr(
+        __s: *const ::std::os::raw::c_char,
+        __c: ::std::os::raw::c_int,
+    ) -> *mut ::std::os::raw::c_char;
+}
+extern "C" {
+    pub fn strrchr(
+        __s: *const ::std::os::raw::c_char,
+        __c: ::std::os::raw::c_int,
+    ) -> *mut ::std::os::raw::c_char;
+}
+extern "C" {
+    pub fn strcspn(
+        __s: *const ::std::os::raw::c_char,
+        __reject: *const ::std::os::raw::c_char,
+    ) -> ::std::os::raw::c_ulong;
+}
+extern "C" {
+    pub fn strspn(
+        __s: *const ::std::os::raw::c_char,
+        __accept: *const ::std::os::raw::c_char,
+    ) -> ::std::os::raw::c_ulong;
+}
+extern "C" {
+    pub fn strpbrk(
+        __s: *const ::std::os::raw::c_char,
+        __accept: *const ::std::os::raw::c_char,
+    ) -> *mut ::std::os::raw::c_char;
+}
+extern "C" {
+    pub fn strstr(
+        __haystack: *const ::std::os::raw::c_char,
+        __needle: *const ::std::os::raw::c_char,
+    ) -> *mut ::std::os::raw::c_char;
+}
+extern "C" {
+    pub fn strtok(
+        __s: *mut ::std::os::raw::c_char,
+        __delim: *const ::std::os::raw::c_char,
+    ) -> *mut ::std::os::raw::c_char;
+}
+extern "C" {
+    pub fn __strtok_r(
+        __s: *mut ::std::os::raw::c_char,
+        __delim: *const ::std::os::raw::c_char,
+        __save_ptr: *mut *mut ::std::os::raw::c_char,
+    ) -> *mut ::std::os::raw::c_char;
+}
+extern "C" {
+    pub fn strtok_r(
+        __s: *mut ::std::os::raw::c_char,
+        __delim: *const ::std::os::raw::c_char,
+        __save_ptr: *mut *mut ::std::os::raw::c_char,
+    ) -> *mut ::std::os::raw::c_char;
+}
+extern "C" {
+    pub fn strlen(__s: *const ::std::os::raw::c_char) -> ::std::os::raw::c_ulong;
+}
+extern "C" {
+    pub fn strnlen(__string: *const ::std::os::raw::c_char, __maxlen: size_t) -> size_t;
+}
+extern "C" {
+    pub fn strerror(__errnum: ::std::os::raw::c_int) -> *mut ::std::os::raw::c_char;
+}
+extern "C" {
+    #[link_name = "\u{1}__xpg_strerror_r"]
+    pub fn strerror_r(
+        __errnum: ::std::os::raw::c_int,
+        __buf: *mut ::std::os::raw::c_char,
+        __buflen: size_t,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn strerror_l(
+        __errnum: ::std::os::raw::c_int,
+        __l: locale_t,
+    ) -> *mut ::std::os::raw::c_char;
+}
+extern "C" {
+    pub fn bcmp(
+        __s1: *const ::std::os::raw::c_void,
+        __s2: *const ::std::os::raw::c_void,
+        __n: ::std::os::raw::c_ulong,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn bcopy(
+        __src: *const ::std::os::raw::c_void,
+        __dest: *mut ::std::os::raw::c_void,
+        __n: size_t,
+    );
+}
+extern "C" {
+    pub fn bzero(__s: *mut ::std::os::raw::c_void, __n: ::std::os::raw::c_ulong);
+}
+extern "C" {
+    pub fn index(
+        __s: *const ::std::os::raw::c_char,
+        __c: ::std::os::raw::c_int,
+    ) -> *mut ::std::os::raw::c_char;
+}
+extern "C" {
+    pub fn rindex(
+        __s: *const ::std::os::raw::c_char,
+        __c: ::std::os::raw::c_int,
+    ) -> *mut ::std::os::raw::c_char;
+}
+extern "C" {
+    pub fn ffs(__i: ::std::os::raw::c_int) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn ffsl(__l: ::std::os::raw::c_long) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn ffsll(__ll: ::std::os::raw::c_longlong) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn strcasecmp(
+        __s1: *const ::std::os::raw::c_char,
+        __s2: *const ::std::os::raw::c_char,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn strncasecmp(
+        __s1: *const ::std::os::raw::c_char,
+        __s2: *const ::std::os::raw::c_char,
+        __n: ::std::os::raw::c_ulong,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn strcasecmp_l(
+        __s1: *const ::std::os::raw::c_char,
+        __s2: *const ::std::os::raw::c_char,
+        __loc: locale_t,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn strncasecmp_l(
+        __s1: *const ::std::os::raw::c_char,
+        __s2: *const ::std::os::raw::c_char,
+        __n: size_t,
+        __loc: locale_t,
+    ) -> ::std::os::raw::c_int;
+}
+extern "C" {
+    pub fn explicit_bzero(__s: *mut ::std::os::raw::c_void, __n: size_t);
+}
+extern "C" {
+    pub fn strsep(
+        __stringp: *mut *mut ::std::os::raw::c_char,
+        __delim: *const ::std::os::raw::c_char,
+    ) -> *mut ::std::os::raw::c_char;
+}
+extern "C" {
+    pub fn strsignal(__sig: ::std::os::raw::c_int) -> *mut ::std::os::raw::c_char;
+}
+extern "C" {
+    pub fn __stpcpy(
+        __dest: *mut ::std::os::raw::c_char,
+        __src: *const ::std::os::raw::c_char,
+    ) -> *mut ::std::os::raw::c_char;
+}
+extern "C" {
+    pub fn stpcpy(
+        __dest: *mut ::std::os::raw::c_char,
+        __src: *const ::std::os::raw::c_char,
+    ) -> *mut ::std::os::raw::c_char;
+}
+extern "C" {
+    pub fn __stpncpy(
+        __dest: *mut ::std::os::raw::c_char,
+        __src: *const ::std::os::raw::c_char,
+        __n: size_t,
+    ) -> *mut ::std::os::raw::c_char;
+}
+extern "C" {
+    pub fn stpncpy(
+        __dest: *mut ::std::os::raw::c_char,
+        __src: *const ::std::os::raw::c_char,
+        __n: ::std::os::raw::c_ulong,
+    ) -> *mut ::std::os::raw::c_char;
+}
+pub type khint_t = u32;
+pub type khiter_t = khint_t;
+extern "C" {
+    pub static __m_empty: [u8; 4usize];
+}
+extern "C" {
+    pub static __m_del: [u8; 4usize];
+}
+extern "C" {
+    pub static __m_either: [u8; 4usize];
+}
+pub type kh_cstr_t = *const ::std::os::raw::c_char;
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct kh_mt {
+    pub n_buckets: khint_t,
+    pub size: khint_t,
+    pub n_occupied: khint_t,
+    pub ed_flags: *mut u8,
+    pub keys: *mut mrb_sym,
+    pub vals: *mut mrb_method_t,
+}
+#[test]
+fn bindgen_test_layout_kh_mt() {
+    assert_eq!(
+        ::std::mem::size_of::<kh_mt>(),
+        40usize,
+        concat!("Size of: ", stringify!(kh_mt))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<kh_mt>(),
+        8usize,
+        concat!("Alignment of ", stringify!(kh_mt))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<kh_mt>())).n_buckets as *const _ as usize },
+        0usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(kh_mt),
+            "::",
+            stringify!(n_buckets)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<kh_mt>())).size as *const _ as usize },
+        4usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(kh_mt),
+            "::",
+            stringify!(size)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<kh_mt>())).n_occupied as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(kh_mt),
+            "::",
+            stringify!(n_occupied)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<kh_mt>())).ed_flags as *const _ as usize },
+        16usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(kh_mt),
+            "::",
+            stringify!(ed_flags)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<kh_mt>())).keys as *const _ as usize },
+        24usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(kh_mt),
+            "::",
+            stringify!(keys)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<kh_mt>())).vals as *const _ as usize },
+        32usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(kh_mt),
+            "::",
+            stringify!(vals)
+        )
+    );
+}
+pub type kh_mt_t = kh_mt;
+extern "C" {
+    pub fn kh_alloc_mt(mrb: *mut mrb_state, h: *mut kh_mt_t);
+}
+extern "C" {
+    pub fn kh_init_mt_size(mrb: *mut mrb_state, size: khint_t) -> *mut kh_mt_t;
+}
+extern "C" {
+    pub fn kh_init_mt(mrb: *mut mrb_state) -> *mut kh_mt_t;
+}
+extern "C" {
+    pub fn kh_destroy_mt(mrb: *mut mrb_state, h: *mut kh_mt_t);
+}
+extern "C" {
+    pub fn kh_clear_mt(mrb: *mut mrb_state, h: *mut kh_mt_t);
+}
+extern "C" {
+    pub fn kh_get_mt(mrb: *mut mrb_state, h: *mut kh_mt_t, key: mrb_sym) -> khint_t;
+}
+extern "C" {
+    pub fn kh_put_mt(
+        mrb: *mut mrb_state,
+        h: *mut kh_mt_t,
+        key: mrb_sym,
+        ret: *mut ::std::os::raw::c_int,
+    ) -> khint_t;
+}
+extern "C" {
+    pub fn kh_put_prepare_mt(mrb: *mut mrb_state, h: *mut kh_mt_t);
+}
+extern "C" {
+    pub fn kh_resize_mt(mrb: *mut mrb_state, h: *mut kh_mt_t, new_n_buckets: khint_t);
+}
+extern "C" {
+    pub fn kh_del_mt(mrb: *mut mrb_state, h: *mut kh_mt_t, x: khint_t);
+}
+extern "C" {
+    pub fn kh_copy_mt(mrb: *mut mrb_state, h: *mut kh_mt_t) -> *mut kh_mt_t;
+}
 extern "C" {
     pub static mut mrb_digitmap: [::std::os::raw::c_char; 0usize];
 }
@@ -4758,6 +7242,9 @@ fn bindgen_test_layout_mrb_jmpbuf() {
     );
 }
 extern "C" {
+    pub static mut mrbrs_method_boxed_func_data_type: mrb_data_type;
+}
+extern "C" {
     pub fn mrbrs_gc_arena_save(mrb: *mut mrb_state) -> ::std::os::raw::c_int;
 }
 extern "C" {
@@ -4780,6 +7267,22 @@ extern "C" {
         obj: mrb_value,
         out_len: *mut size_t,
     ) -> *const ::std::os::raw::c_char;
+}
+extern "C" {
+    pub fn mrbrs_method_make_boxed_func(
+        mrb: *mut mrb_state,
+        boxed_func: *mut ::std::os::raw::c_void,
+        out_exc: *mut *mut RObject,
+    ) -> *mut RProc;
+}
+extern "C" {
+    pub fn mrbrs_define_method_proc(
+        mrb: *mut mrb_state,
+        klass: *mut RClass,
+        name: *const ::std::os::raw::c_char,
+        proc_: *mut RProc,
+        out_exc: *mut *mut RObject,
+    );
 }
 pub type __builtin_va_list = [__va_list_tag; 1usize];
 #[repr(C)]
@@ -4855,17 +7358,17 @@ pub struct iv_tbl {
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
-pub struct RProc {
-    pub _address: u8,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
-pub struct REnv {
-    pub _address: u8,
-}
-#[repr(C)]
-#[derive(Debug, Copy, Clone)]
 pub struct symbol_name {
+    pub _address: u8,
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct mrb_irep_debug_info {
+    pub _address: u8,
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct __locale_data {
     pub _address: u8,
 }
 #[repr(C)]

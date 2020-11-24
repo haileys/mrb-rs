@@ -9,6 +9,7 @@ use std::ptr;
 use std::slice;
 
 mod marker;
+mod method;
 mod object;
 mod state;
 
@@ -28,8 +29,14 @@ impl Mrb {
         Mrb { state }
     }
 
-    pub fn context<Ret>(&mut self, f: impl FnOnce(Context) -> Ret) -> Ret {
-        f(Context::new(&mut self.state))
+    pub fn context<Ret>(&mut self, f: impl for<'mrb> FnOnce(&Context<'mrb>) -> Ret) -> Ret {
+        let ctx = Context::new(&mut self.state);
+        f(&ctx)
+    }
+
+    pub fn try_context<Ret>(&mut self, f: impl for<'mrb> FnOnce(&Context<'mrb>) -> MrbResult<'mrb, Ret>) -> Result<Ret, String> {
+        let ctx = Context::new(&mut self.state);
+        f(&ctx).map_err(|e| format!("{:?}", e))
     }
 }
 
@@ -108,7 +115,7 @@ impl<'mrb> Context<'mrb> {
 
 #[cfg(test)]
 mod tests {
-    use super::Mrb;
+    use crate::Mrb;
 
     #[test]
     fn test_open_close() {
