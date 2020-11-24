@@ -9,3 +9,4 @@ links = "mruby"
 
 [build-dependencies]
 bindgen = "0.55"
+cc = "1.0"
