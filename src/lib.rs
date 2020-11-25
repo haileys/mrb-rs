@@ -3,6 +3,7 @@ pub use mrb_sys as sys;
 use std::borrow::Cow;
 use std::convert::TryInto;
 use std::ffi::CString;
+use std::mem;
 use std::os::raw::c_int;
 use std::ptr;
 use std::slice;
@@ -71,6 +72,19 @@ impl<'mrb> Context<'mrb> {
         }
     }
 
+    fn boundary<R>(&self, f: impl FnOnce() -> R) -> MrbResult<'mrb, R> {
+        let result = f();
+
+        let mut exc = ptr::null_mut();
+        mem::swap(&mut exc, unsafe { &mut (*self.mrb).exc });
+
+        if exc == ptr::null_mut() {
+            Ok(result)
+        } else {
+            Err(unsafe { MrbException(MrbPtr::new(self.mrb, exc)) })
+        }
+    }
+
     pub fn object_class(&self) -> MrbClass<'mrb> {
         MrbClass(unsafe {
             MrbPtr::new(self.mrb, (*self.mrb).object_class)
@@ -82,14 +96,14 @@ impl<'mrb> Context<'mrb> {
 
         let mut exc = ptr::null_mut();
 
-        let ptr = unsafe {
+        let ptr = self.boundary(|| unsafe {
             sys::mrbrs_define_class(
                 self.mrb,
                 name.as_ptr(),
                 superclass.0.as_ptr(),
                 &mut exc as *mut *mut _,
             )
-        };
+        })?;
 
         if ptr == ptr::null_mut() {
             Err(unsafe { MrbException(MrbPtr::new(self.mrb, exc)) })
@@ -114,14 +128,14 @@ impl<'mrb> Context<'mrb> {
     pub fn load_string(&self, code: &str) -> MrbResult<'mrb, MrbValue<'mrb>> {
         let mut exc = ptr::null_mut();
 
-        let result = unsafe {
+        let result = self.boundary(|| unsafe {
             sys::mrbrs_load_nstring(
                 self.mrb,
                 code.as_ptr() as *const i8,
                 code.len().try_into().unwrap(),
                 &mut exc,
             )
-        };
+        })?;
 
         if exc == ptr::null_mut() {
             Ok(unsafe { MrbValue::new(result) })

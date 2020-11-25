@@ -74,19 +74,19 @@ impl<'mrb> Context<'mrb> {
 
         let mut exc = ptr::null_mut();
 
-        let proc_ = unsafe {
+        let proc_ = self.boundary(|| unsafe {
             mrb_sys::mrbrs_method_make_boxed_func(
                 self.mrb,
                 func as *mut c_void,
                 &mut exc as *mut _,
             )
-        };
+        })?;
 
         if proc_ == ptr::null_mut() {
             return Err(unsafe { MrbException(MrbPtr::new(self.mrb, exc)) });
         }
 
-        unsafe {
+        self.boundary(|| unsafe {
             mrb_sys::mrbrs_define_method_proc(
                 self.mrb,
                 class.0.as_ptr(),
@@ -94,7 +94,7 @@ impl<'mrb> Context<'mrb> {
                 proc_,
                 &mut exc as *mut _,
             );
-        }
+        })?;
 
         if exc != ptr::null_mut() {
             return Err(unsafe { MrbException(MrbPtr::new(self.mrb, exc)) });
