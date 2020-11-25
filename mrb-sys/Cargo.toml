@@ -4,6 +4,8 @@ version = "0.1.0"
 authors = ["Charlie Somerville <charlie@charlie.bz>"]
 edition = "2018"
 links = "mruby"
+description = "FFI bindings to mruby"
+license = "MIT"
 
 [dependencies]
 
