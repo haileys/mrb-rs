@@ -36,13 +36,28 @@ unsafe extern "C" fn mrbrs_method_dispatch_boxed_func(
 ) -> mrb_sys::mrb_value {
     let ctx = Context::new(mrb);
     let func = data as *mut BoxedFunc;
-    let result = (*func)(&ctx, MrbValue::new(value));
+
+    let result = panic::catch_unwind(|| {
+        (*func)(&ctx, MrbValue::new(value))
+    });
 
     match result {
-        Ok(val) => val.as_raw(),
-        Err(e) => {
+        // normal return:
+        Ok(Ok(val)) => val.as_raw(),
+
+        // ruby exception:
+        Ok(Err(ex)) => {
             // TODO make this a proper ruby exception
             eprintln!("exception from Rust method! {:?}", e);
+            process::abort();
+        }
+
+        // rust panic:
+        Err(panic) => {
+            // TODO stash this panic somewhere so we can resume unwind once
+            // we're back in Rust on the other side
+            eprintln!("PANIC while calling Rust method in mrbrs_method_dispatch_boxed_func: {:?}", e);
+            eprintln!("Cannot unwind, aborting");
             process::abort();
         }
     }
