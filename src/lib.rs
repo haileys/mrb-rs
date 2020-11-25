@@ -111,6 +111,25 @@ impl<'mrb> Context<'mrb> {
     pub fn inspect(&self, value: MrbValue<'mrb>) -> Cow<'mrb, str> {
         object::inspect(self.state, value)
     }
+
+    pub fn load_string(&self, code: &str) -> MrbResult<'mrb, MrbValue<'mrb>> {
+        let mut exc = ptr::null_mut();
+
+        let result = unsafe {
+            sys::mrbrs_load_nstring(
+                self.state.as_ptr(),
+                code.as_ptr() as *const i8,
+                code.len().try_into().unwrap(),
+                &mut exc,
+            )
+        };
+
+        if exc == ptr::null_mut() {
+            Ok(unsafe { MrbValue::new(result) })
+        } else {
+            Err(unsafe { MrbException(MrbPtr::new(self.state, exc)) })
+        }
+    }
 }
 
 #[cfg(test)]
@@ -143,6 +162,23 @@ mod tests {
 
         mrb.context(|mrb| {
             assert_eq!(0, mrb.arguments().len());
+        });
+    }
+
+    #[test]
+    fn test_load_string() {
+        let mut mrb = Mrb::open();
+
+        mrb.context(|mrb| {
+            let eval = |code: &str| -> Result<String, String> {
+                mrb.load_string(code)
+                    .map(|val| mrb.inspect(val).to_string())
+                    .map_err(|err| format!("{:?}", err))
+            };
+
+            assert_eq!("3", eval("1 + 2").unwrap());
+            assert_eq!("hello (RuntimeError)", eval("raise 'hello'").unwrap_err());
+            assert_eq!("syntax error (SyntaxError)", eval("$%^&#$W").unwrap_err());
         });
     }
 }

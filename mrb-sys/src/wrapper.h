@@ -29,3 +29,6 @@ mrbrs_method_make_boxed_func(mrb_state* mrb, void* boxed_func, struct RObject** 
 
 void
 mrbrs_define_method_proc(mrb_state* mrb, struct RClass* klass, const char* name, struct RProc* proc, struct RObject** out_exc);
+
+mrb_value
+mrbrs_load_nstring(mrb_state* mrb, const char* s, size_t len, struct RObject** out_exc);

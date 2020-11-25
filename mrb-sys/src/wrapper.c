@@ -137,7 +137,6 @@ mrbrs_define_method_proc(mrb_state* mrb, struct RClass* klass, const char* name,
 {
     struct mrb_jmpbuf* prev_jmp = mrb->jmp;
     struct mrb_jmpbuf jmp;
-    struct RProc* result = NULL;
 
     MRB_TRY(&jmp) {
         mrb->jmp = &jmp;
@@ -153,4 +152,38 @@ mrbrs_define_method_proc(mrb_state* mrb, struct RClass* klass, const char* name,
         *out_exc = mrb->exc;
         mrb->jmp = prev_jmp;
     } MRB_END_EXC(&jmp);
+}
+
+mrb_value
+mrbrs_load_nstring(mrb_state* mrb, const char* s, size_t len, struct RObject** out_exc)
+{
+    struct mrb_jmpbuf* prev_jmp = mrb->jmp;
+    struct mrb_jmpbuf jmp;
+    mrb_value result = mrb_nil_value();
+
+    int ai = mrb_gc_arena_save(mrb);
+
+    // mrb_load_nstring returns nil if an exception is thrown that occurs while
+    // executing the loaded code, so we must unconditionally assign mrb->exc to
+    // *out_exc after the try/catch block below. clear out mrb->exc first so
+    // that if it non-null after the try/catch we know an exception was thrown
+    mrb->exc = NULL;
+
+    MRB_TRY(&jmp) {
+        mrb->jmp = &jmp;
+
+        result = mrb_load_nstring(mrb, s, len);
+        mrb_gc_arena_restore(mrb, ai);
+        mrb_gc_protect(mrb, result);
+
+        mrb->jmp = prev_jmp;
+    } MRB_CATCH(&jmp) {
+        mrb_gc_arena_restore(mrb, ai);
+        mrb->jmp = prev_jmp;
+    } MRB_END_EXC(&jmp);
+
+    // unconditionally assign the exception pointer, see comment above
+    *out_exc = mrb->exc;
+
+    return result;
 }
