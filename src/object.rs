@@ -1,7 +1,6 @@
 use std::borrow::Cow;
 use std::convert::TryInto;
 use std::fmt::{self, Debug};
-use std::marker::PhantomData;
 use std::slice;
 
 use crate::marker::Invariant;
@@ -17,7 +16,7 @@ impl<'mrb> MrbValue<'mrb> {
     pub(crate) unsafe fn new(value: mrb_sys::mrb_value) -> Self {
         MrbValue {
             value,
-            _inv: PhantomData,
+            _inv: Invariant::phantom(),
         }
     }
 
@@ -38,7 +37,7 @@ impl<'mrb, T> MrbPtr<'mrb, T> {
         MrbPtr {
             mrb,
             ptr,
-            _inv: PhantomData,
+            _inv: Invariant::phantom(),
         }
     }
 
@@ -50,7 +49,7 @@ impl<'mrb, T> MrbPtr<'mrb, T> {
         MrbPtr {
             mrb: self.mrb,
             ptr: self.ptr as *mut U,
-            _inv: PhantomData,
+            _inv: Invariant::phantom(),
         }
     }
 

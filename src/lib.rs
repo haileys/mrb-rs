@@ -3,7 +3,6 @@ pub use mrb_sys as sys;
 use std::borrow::Cow;
 use std::convert::TryInto;
 use std::ffi::CString;
-use std::marker::PhantomData;
 use std::os::raw::c_int;
 use std::ptr;
 use std::slice;
@@ -68,7 +67,7 @@ impl<'mrb> Context<'mrb> {
         Context {
             mrb,
             arena_index,
-            _invariant: PhantomData,
+            _invariant: Invariant::phantom(),
         }
     }
 
