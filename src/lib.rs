@@ -30,18 +30,18 @@ impl Mrb {
     }
 
     pub fn context<Ret>(&mut self, f: impl for<'mrb> FnOnce(&Context<'mrb>) -> Ret) -> Ret {
-        let ctx = Context::new(&mut self.state);
+        let ctx = unsafe { Context::new(self.state.as_ptr()) };
         f(&ctx)
     }
 
     pub fn try_context<Ret>(&mut self, f: impl for<'mrb> FnOnce(&Context<'mrb>) -> MrbResult<'mrb, Ret>) -> Result<Ret, String> {
-        let ctx = Context::new(&mut self.state);
+        let ctx = unsafe { Context::new(self.state.as_ptr()) };
         f(&ctx).map_err(|e| format!("{:?}", e))
     }
 }
 
 pub struct Context<'mrb> {
-    state: &'mrb MrbState,
+    mrb: *mut sys::mrb_state,
 
     // all objects returned to Rust while working with a context are saved in
     // the arena so they don't get garbage collected from underneath us. on
@@ -55,18 +55,18 @@ pub struct Context<'mrb> {
 
 impl<'mrb> Drop for Context<'mrb> {
     fn drop(&mut self) {
-        unsafe { sys::mrbrs_gc_arena_restore(self.state.as_ptr(), self.arena_index) };
+        unsafe { sys::mrbrs_gc_arena_restore(self.mrb, self.arena_index) };
     }
 }
 
 pub type MrbResult<'mrb, T> = Result<T, MrbException<'mrb>>;
 
 impl<'mrb> Context<'mrb> {
-    fn new(state: &'mrb MrbState) -> Self {
-        let arena_index = unsafe { sys::mrbrs_gc_arena_save(state.as_ptr()) };
+    unsafe fn new(mrb: *mut sys::mrb_state) -> Self {
+        let arena_index = sys::mrbrs_gc_arena_save(mrb);
 
         Context {
-            state,
+            mrb,
             arena_index,
             _invariant: PhantomData,
         }
@@ -74,7 +74,7 @@ impl<'mrb> Context<'mrb> {
 
     pub fn object_class(&self) -> MrbClass<'mrb> {
         MrbClass(unsafe {
-            MrbPtr::new(self.state, self.state.as_ref().object_class)
+            MrbPtr::new(self.mrb, (*self.mrb).object_class)
         })
     }
 
@@ -85,7 +85,7 @@ impl<'mrb> Context<'mrb> {
 
         let ptr = unsafe {
             sys::mrbrs_define_class(
-                self.state.as_ptr(),
+                self.mrb,
                 name.as_ptr(),
                 superclass.0.as_ptr(),
                 &mut exc as *mut *mut _,
@@ -93,23 +93,23 @@ impl<'mrb> Context<'mrb> {
         };
 
         if ptr == ptr::null_mut() {
-            Err(unsafe { MrbException(MrbPtr::new(self.state, exc)) })
+            Err(unsafe { MrbException(MrbPtr::new(self.mrb, exc)) })
         } else {
-            Ok(unsafe { MrbClass(MrbPtr::new(self.state, ptr)) })
+            Ok(unsafe { MrbClass(MrbPtr::new(self.mrb, ptr)) })
         }
     }
 
     pub fn arguments(&self) -> &'mrb [MrbValue<'mrb>] {
         unsafe {
-            let argc = sys::mrb_get_argc(self.state.as_ptr());
-            let argv = sys::mrb_get_argv(self.state.as_ptr());
+            let argc = sys::mrb_get_argc(self.mrb);
+            let argv = sys::mrb_get_argv(self.mrb);
             let ptr = argv as *const _ as *const MrbValue<'mrb>;
             slice::from_raw_parts(ptr, argc.try_into().unwrap())
         }
     }
 
     pub fn inspect(&self, value: MrbValue<'mrb>) -> Cow<'mrb, str> {
-        object::inspect(self.state, value)
+        unsafe { object::inspect(self.mrb, value) }
     }
 
     pub fn load_string(&self, code: &str) -> MrbResult<'mrb, MrbValue<'mrb>> {
@@ -117,7 +117,7 @@ impl<'mrb> Context<'mrb> {
 
         let result = unsafe {
             sys::mrbrs_load_nstring(
-                self.state.as_ptr(),
+                self.mrb,
                 code.as_ptr() as *const i8,
                 code.len().try_into().unwrap(),
                 &mut exc,
@@ -127,7 +127,7 @@ impl<'mrb> Context<'mrb> {
         if exc == ptr::null_mut() {
             Ok(unsafe { MrbValue::new(result) })
         } else {
-            Err(unsafe { MrbException(MrbPtr::new(self.state, exc)) })
+            Err(unsafe { MrbException(MrbPtr::new(self.mrb, exc)) })
         }
     }
 }

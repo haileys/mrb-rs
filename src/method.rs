@@ -8,7 +8,7 @@ use std::ptr;
 use crate::{MrbPtr, MrbResult, Context};
 use crate::object::{MrbValue, MrbClass, MrbException};
 
-type BoxedFunc = Box<dyn for<'sub> Fn(Context<'sub>, MrbValue<'sub>) -> MrbValue<'sub> + 'static>;
+type BoxedFunc = Box<dyn for<'sub> Fn(&Context<'sub>, MrbValue<'sub>) -> MrbResult<'sub, MrbValue<'sub>> + 'static>;
 
 #[no_mangle]
 unsafe extern "C" fn mrbrs_method_free_boxed_func(_mrb: *mut mrb_sys::mrb_state, ptr: *mut c_void) {
@@ -29,14 +29,28 @@ unsafe extern "C" fn mrbrs_method_free_boxed_func(_mrb: *mut mrb_sys::mrb_state,
 }
 
 #[no_mangle]
-unsafe extern "C" fn mrbrs_method_dispatch_boxed_func(_mrb: *mut mrb_sys::mrb_state, value: mrb_sys::mrb_value) -> mrb_sys::mrb_value {
-    println!("dispatch!");
-    process::abort();
+unsafe extern "C" fn mrbrs_method_dispatch_boxed_func(
+    mrb: *mut mrb_sys::mrb_state,
+    value: mrb_sys::mrb_value,
+    data: *mut c_void,
+) -> mrb_sys::mrb_value {
+    let ctx = Context::new(mrb);
+    let func = data as *mut BoxedFunc;
+    let result = (*func)(&ctx, MrbValue::new(value));
+
+    match result {
+        Ok(val) => val.as_raw(),
+        Err(e) => {
+            // TODO make this a proper ruby exception
+            eprintln!("exception from Rust method! {:?}", e);
+            process::abort();
+        }
+    }
 }
 
 impl<'mrb> Context<'mrb> {
     pub fn define_method<F>(&self, class: MrbClass<'mrb>, name: &str, func: F) -> MrbResult<'mrb, ()>
-        where F: for<'sub> Fn(Context<'sub>, MrbValue<'sub>) -> MrbValue<'sub> + 'static
+        where F: for<'sub> Fn(&Context<'sub>, MrbValue<'sub>) -> MrbResult<'sub, MrbValue<'sub>> + 'static
     {
         let name = CString::new(name).expect("CString::from");
 
@@ -47,19 +61,19 @@ impl<'mrb> Context<'mrb> {
 
         let proc_ = unsafe {
             mrb_sys::mrbrs_method_make_boxed_func(
-                self.state.as_ptr(),
+                self.mrb,
                 func as *mut c_void,
                 &mut exc as *mut _,
             )
         };
 
         if proc_ == ptr::null_mut() {
-            return Err(unsafe { MrbException(MrbPtr::new(self.state, exc)) });
+            return Err(unsafe { MrbException(MrbPtr::new(self.mrb, exc)) });
         }
 
         unsafe {
             mrb_sys::mrbrs_define_method_proc(
-                self.state.as_ptr(),
+                self.mrb,
                 class.0.as_ptr(),
                 name.as_ptr(),
                 proc_,
@@ -68,7 +82,7 @@ impl<'mrb> Context<'mrb> {
         }
 
         if exc != ptr::null_mut() {
-            return Err(unsafe { MrbException(MrbPtr::new(self.state, exc)) });
+            return Err(unsafe { MrbException(MrbPtr::new(self.mrb, exc)) });
         }
 
         Ok(())
@@ -84,9 +98,11 @@ mod tests {
         let mut mrb = Mrb::open();
 
         mrb.try_context(|mrb| {
-            mrb.define_method(mrb.object_class(), "my_method", |ctx, self_| {
-                todo!()
+            mrb.define_method(mrb.object_class(), "my_method", |_ctx, _self| {
+                panic!("rust method!")
             })?;
+
+            mrb.load_string("my_method")?;
 
             Ok(())
         }).expect("try_context");

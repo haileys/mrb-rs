@@ -5,7 +5,6 @@ use std::marker::PhantomData;
 use std::slice;
 
 use crate::marker::Invariant;
-use crate::state::MrbState;
 
 #[repr(transparent)]
 #[derive(Copy, Clone)]
@@ -21,17 +20,26 @@ impl<'mrb> MrbValue<'mrb> {
             _inv: PhantomData,
         }
     }
+
+    pub(crate) fn as_raw(self) -> mrb_sys::mrb_value {
+        self.value
+    }
 }
 
 pub struct MrbPtr<'mrb, T> {
-    state: &'mrb MrbState,
+    mrb: *mut mrb_sys::mrb_state,
     ptr: *mut T,
+    _inv: Invariant<'mrb>,
 }
 
 impl<'mrb, T> MrbPtr<'mrb, T> {
     /// Safety: you guarantee that `ptr` has lifetime `'mrb`
-    pub(crate) unsafe fn new(state: &'mrb MrbState, ptr: *mut T) -> Self {
-        MrbPtr { state, ptr }
+    pub(crate) unsafe fn new(mrb: *mut mrb_sys::mrb_state, ptr: *mut T) -> Self {
+        MrbPtr {
+            mrb,
+            ptr,
+            _inv: PhantomData,
+        }
     }
 
     pub(crate) fn as_ptr(&self) -> *mut T {
@@ -40,15 +48,16 @@ impl<'mrb, T> MrbPtr<'mrb, T> {
 
     pub(crate) unsafe fn cast<U>(self) -> MrbPtr<'mrb, U> {
         MrbPtr {
-            state: self.state,
+            mrb: self.mrb,
             ptr: self.ptr as *mut U,
+            _inv: PhantomData,
         }
     }
 
     pub(crate) fn inspect(&self) -> Cow<'mrb, str> {
         unsafe {
             let value = mrb_sys::mrbrs_obj_value(self.ptr as *mut _);
-            inspect(self.state, MrbValue::new(value))
+            inspect(self.mrb, MrbValue::new(value))
         }
     }
 }
@@ -91,14 +100,12 @@ impl<'mrb> Debug for MrbException<'mrb> {
     }
 }
 
-pub(crate) fn inspect<'mrb>(state: &'mrb MrbState, value: MrbValue<'mrb>) -> Cow<'mrb, str> {
-    unsafe {
-        let mut len: mrb_sys::size_t = 0;
-        let ptr = mrb_sys::mrbrs_inspect(state.as_ptr(), value.value, &mut len as *mut _);
-        let bytes = slice::from_raw_parts(ptr as *const u8, len.try_into().unwrap());
+pub(crate) unsafe fn inspect<'mrb>(mrb: *mut mrb_sys::mrb_state, value: MrbValue<'mrb>) -> Cow<'mrb, str> {
+    let mut len: mrb_sys::size_t = 0;
+    let ptr = mrb_sys::mrbrs_inspect(mrb, value.value, &mut len as *mut _);
+    let bytes = slice::from_raw_parts(ptr as *const u8, len.try_into().unwrap());
 
-        // Safety: mrbrs_inspect freezes and GC protects the string so we
-        // know the underlying buffer will be valid for the 'mrb lifetime
-        String::from_utf8_lossy(bytes)
-    }
+    // Safety: mrbrs_inspect freezes and GC protects the string so we
+    // know the underlying buffer will be valid for the 'mrb lifetime
+    String::from_utf8_lossy(bytes)
 }

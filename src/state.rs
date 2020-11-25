@@ -19,10 +19,6 @@ impl MrbState {
     pub fn as_ptr(&self) -> *mut sys::mrb_state {
         self.0
     }
-
-    pub fn as_ref(&self) -> &sys::mrb_state {
-        unsafe { &*self.0 }
-    }
 }
 
 impl Drop for MrbState {

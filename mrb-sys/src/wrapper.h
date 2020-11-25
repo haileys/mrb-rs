@@ -6,9 +6,6 @@
 #include <mruby/throw.h>
 #include <mruby/value.h>
 
-extern mrb_data_type
-mrbrs_method_boxed_func_data_type;
-
 int
 mrbrs_gc_arena_save(mrb_state *mrb);
 

@@ -87,13 +87,21 @@ mrbrs_inspect(mrb_state* mrb, mrb_value obj, size_t* out_len)
 
 
 void mrbrs_method_free_boxed_func(mrb_state*, void*);
-mrb_value mrbrs_method_dispatch_boxed_func(mrb_state*, mrb_value);
+mrb_value mrbrs_method_dispatch_boxed_func(mrb_state*, mrb_value, void*);
 
-mrb_data_type
-mrbrs_method_boxed_func_data_type = {
+static mrb_data_type
+boxed_func_data_type = {
     .struct_name = "mrbrs::method::BoxedFunc",
     .dfree = mrbrs_method_free_boxed_func,
 };
+
+static mrb_value
+boxed_func_dispatch(mrb_state* mrb, mrb_value self)
+{
+    mrb_value data_obj = mrb_proc_cfunc_env_get(mrb, 0);
+    void* data = mrb_data_get_ptr(mrb, data_obj, &boxed_func_data_type);
+    return mrbrs_method_dispatch_boxed_func(mrb, self, data);
+}
 
 struct RProc*
 mrbrs_method_make_boxed_func(mrb_state* mrb, void* boxed_func, struct RObject** out_exc)
@@ -111,13 +119,13 @@ mrbrs_method_make_boxed_func(mrb_state* mrb, void* boxed_func, struct RObject** 
                     mrb,
                     NULL,
                     boxed_func,
-                    &mrbrs_method_boxed_func_data_type));
+                    &boxed_func_data_type));
 
         mrb_gc_protect(mrb, data);
 
         result = mrb_proc_new_cfunc_with_env(
             mrb,
-            mrbrs_method_dispatch_boxed_func,
+            boxed_func_dispatch,
             1,
             &data);
 
