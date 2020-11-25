@@ -6,6 +6,7 @@ edition = "2018"
 links = "mruby"
 description = "FFI bindings to mruby"
 license = "MIT"
+repository = "https://github.com/charliesome/mrb-rs"
 
 [dependencies]
 
