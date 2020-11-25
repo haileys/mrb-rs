@@ -1,6 +1,69 @@
+#include <stdlib.h>
 #include <string.h>
 
 #include "wrapper.h"
+
+mrb_state*
+mrbrs_open_core()
+{
+    // allocate userdata struct for mrbrs
+
+    mrbrs_ud* ud = calloc(1, sizeof(mrbrs_ud));
+
+    if (!ud) {
+        return NULL;
+    }
+
+    // open mruby
+
+    mrb_state* mrb = mrb_open_core(mrb_default_allocf, NULL);
+
+    if (!mrb) {
+        // free ud if we can't open mruby
+        free(ud);
+        return NULL;
+    }
+
+    mrb->ud = ud;
+
+    // initialize panic carrier exception in try block
+    // this is an exception that needs to be uncatchable by Ruby, so we clone
+    // BasicObject to create a parallel class hierarchy root and create an
+    // instance of said class.
+
+    struct mrb_jmpbuf jmp;
+    MRB_TRY(&jmp) {
+        int ai = mrb_gc_arena_save(mrb);
+        mrb->jmp = &jmp;
+
+        struct RClass* basic_object = mrb_class_get(mrb, "BasicObject");
+
+        mrb_value carrier_obj = mrb_obj_dup(mrb, mrb_obj_value(basic_object));
+        mrb_gc_protect(mrb, carrier_obj);
+
+        struct RClass* carrier = mrb_class_ptr(carrier_obj);
+        mrb_value ex_panic_obj = mrb_obj_new(mrb, carrier, 0, NULL);
+        mrb_gc_protect(mrb, ex_panic_obj);
+
+        ud->panic_carrier = mrb_obj_ptr(ex_panic_obj);
+
+        mrb_gc_arena_restore(mrb, ai);
+        mrb->jmp = NULL;
+    } MRB_CATCH(&jmp) {
+        // something went wrong
+        mrbrs_close(mrb);
+        mrb = NULL;
+    } MRB_END_EXC(&jmp);
+
+    return mrb;
+}
+
+void
+mrbrs_close(mrb_state* mrb)
+{
+    free(mrb->ud);
+    mrb_close(mrb);
+}
 
 int
 mrbrs_gc_arena_save(mrb_state *mrb)
@@ -85,7 +148,7 @@ mrbrs_inspect(mrb_state* mrb, mrb_value obj, size_t* out_len)
 
 
 void mrbrs_method_free_boxed_func(mrb_state*, void*);
-mrb_value mrbrs_method_dispatch_boxed_func(mrb_state*, mrb_value, void*);
+void mrbrs_method_dispatch_boxed_func(mrb_state*, mrb_value, void*, mrb_value*);
 
 static mrb_data_type
 boxed_func_data_type = {
@@ -98,7 +161,15 @@ boxed_func_dispatch(mrb_state* mrb, mrb_value self)
 {
     mrb_value data_obj = mrb_proc_cfunc_env_get(mrb, 0);
     void* data = mrb_data_get_ptr(mrb, data_obj, &boxed_func_data_type);
-    return mrbrs_method_dispatch_boxed_func(mrb, self, data);
+
+    mrb_value retn = mrb_undef_value();
+    mrbrs_method_dispatch_boxed_func(mrb, self, data, &retn);
+
+    if (mrb->exc) {
+        MRB_THROW(mrb->jmp);
+    }
+
+    return retn;
 }
 
 struct RProc*

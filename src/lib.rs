@@ -3,11 +3,10 @@ pub use mrb_sys as sys;
 use std::borrow::Cow;
 use std::convert::TryInto;
 use std::ffi::CString;
-use std::mem;
 use std::os::raw::c_int;
-use std::ptr;
 use std::slice;
 
+mod boundary;
 mod marker;
 mod method;
 mod object;
@@ -73,16 +72,7 @@ impl<'mrb> Context<'mrb> {
     }
 
     fn boundary<R>(&self, f: impl FnOnce() -> R) -> MrbResult<'mrb, R> {
-        let result = f();
-
-        let mut exc = ptr::null_mut();
-        mem::swap(&mut exc, unsafe { &mut (*self.mrb).exc });
-
-        if exc == ptr::null_mut() {
-            Ok(result)
-        } else {
-            Err(unsafe { MrbException(MrbPtr::new(self.mrb, exc)) })
-        }
+        unsafe { boundary::into_mruby(self.mrb, f) }
     }
 
     pub fn object_class(&self) -> MrbClass<'mrb> {
@@ -94,22 +84,15 @@ impl<'mrb> Context<'mrb> {
     pub fn define_class(&self, name: &str, superclass: MrbClass<'mrb>) -> MrbResult<'mrb, MrbClass<'mrb>> {
         let name = CString::new(name).expect("CString::from");
 
-        let mut exc = ptr::null_mut();
-
         let ptr = self.boundary(|| unsafe {
             sys::mrbrs_define_class(
                 self.mrb,
                 name.as_ptr(),
                 superclass.0.as_ptr(),
-                &mut exc as *mut *mut _,
             )
         })?;
 
-        if ptr == ptr::null_mut() {
-            Err(unsafe { MrbException(MrbPtr::new(self.mrb, exc)) })
-        } else {
-            Ok(unsafe { MrbClass(MrbPtr::new(self.mrb, ptr)) })
-        }
+        Ok(unsafe { MrbClass(MrbPtr::new(self.mrb, ptr)) })
     }
 
     pub fn arguments(&self) -> &'mrb [MrbValue<'mrb>] {
@@ -126,22 +109,15 @@ impl<'mrb> Context<'mrb> {
     }
 
     pub fn load_string(&self, code: &str) -> MrbResult<'mrb, MrbValue<'mrb>> {
-        let mut exc = ptr::null_mut();
-
         let result = self.boundary(|| unsafe {
             sys::mrbrs_load_nstring(
                 self.mrb,
                 code.as_ptr() as *const i8,
                 code.len().try_into().unwrap(),
-                &mut exc,
             )
         })?;
 
-        if exc == ptr::null_mut() {
-            Ok(unsafe { MrbValue::new(result) })
-        } else {
-            Err(unsafe { MrbException(MrbPtr::new(self.mrb, exc)) })
-        }
+        Ok(unsafe { MrbValue::new(result) })
     }
 }
 

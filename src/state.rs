@@ -6,7 +6,7 @@ pub(crate) struct MrbState(*mut sys::mrb_state);
 impl MrbState {
     pub fn open() -> Result<Self, ()> {
         let state = unsafe {
-            sys::mrb_open_core(Some(sys::mrb_default_allocf), ptr::null_mut())
+            sys::mrbrs_open_core()
         };
 
         if state == ptr::null_mut() {
@@ -24,7 +24,7 @@ impl MrbState {
 impl Drop for MrbState {
     fn drop(&mut self) {
         unsafe {
-            sys::mrb_close(self.0);
+            sys::mrbrs_close(self.0);
         }
     }
 }

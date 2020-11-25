@@ -25,6 +25,12 @@ impl<'mrb> MrbValue<'mrb> {
     }
 }
 
+impl<'mrb> Debug for MrbValue<'mrb> {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "MrbValue({:x?})", unsafe { self.value.value.p })
+    }
+}
+
 pub struct MrbPtr<'mrb, T> {
     mrb: *mut mrb_sys::mrb_state,
     ptr: *mut T,

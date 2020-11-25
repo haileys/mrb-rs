@@ -1,10 +1,22 @@
 #include <mruby.h>
 #include <mruby/class.h>
 #include <mruby/data.h>
+#include <mruby/error.h>
 #include <mruby/proc.h>
 #include <mruby/string.h>
 #include <mruby/throw.h>
 #include <mruby/value.h>
+
+typedef struct {
+    struct RObject* panic_carrier;
+    void* panic_info;
+} mrbrs_ud;
+
+mrb_state*
+mrbrs_open_core();
+
+void
+mrbrs_close(mrb_state* mrb);
 
 int
 mrbrs_gc_arena_save(mrb_state *mrb);
