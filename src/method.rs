@@ -1,8 +1,6 @@
 use std::ffi::CString;
 use std::mem;
 use std::os::raw::c_void;
-use std::panic;
-use std::process;
 
 use crate::{MrbResult, Context};
 use crate::boundary;
@@ -10,20 +8,25 @@ use crate::object::{MrbValue, MrbClass};
 
 type BoxedFunc = Box<dyn for<'sub> Fn(&Context<'sub>, MrbValue<'sub>) -> MrbResult<'sub, MrbValue<'sub>> + 'static>;
 
+unsafe fn exc_panic_carrier(mrb: *mut mrb_sys::mrb_state) {
+    let ud = (*mrb).ud as *const mrb_sys::mrbrs_ud;
+    let carrier = (*ud).panic_carrier;
+    (*mrb).exc = carrier;
+}
+
 #[no_mangle]
-unsafe extern "C" fn mrbrs_method_free_boxed_func(_mrb: *mut mrb_sys::mrb_state, ptr: *mut c_void) {
-    let result = panic::catch_unwind(|| {
+unsafe extern "C" fn mrbrs_method_free_boxed_func(mrb: *mut mrb_sys::mrb_state, ptr: *mut c_void) {
+    let result = boundary::into_rust(mrb, || {
         mem::drop(Box::from_raw(ptr as *mut BoxedFunc));
     });
 
     match result {
         Ok(()) => {}
-        Err(e) => {
-            // TODO stash this panic somewhere so we can resume unwind once
-            // we're back in Rust on the other side
-            eprintln!("PANIC while dropping BoxedFunc in mrbrs_method_free_boxed_func: {:?}", e);
-            eprintln!("Cannot unwind, aborting");
-            process::abort();
+        Err(()) => {
+            // we can't actually throw a ruby exception from the context this
+            // function is called in, but the boundary::into_mruby will still
+            // catch this exception on the other side and resume the unwind
+            exc_panic_carrier(mrb);
         }
     }
 }
@@ -55,9 +58,7 @@ unsafe extern "C" fn mrbrs_method_dispatch_boxed_func(
 
         // rust panic:
         Err(()) => {
-            let ud = (*mrb).ud as *const mrb_sys::mrbrs_ud;
-            let carrier = (*ud).panic_carrier;
-            (*mrb).exc = carrier;
+            exc_panic_carrier(mrb);
         }
     }
 }
