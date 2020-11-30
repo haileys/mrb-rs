@@ -8046,6 +8046,20 @@ extern "C" {
     ) -> mrb_value;
 }
 extern "C" {
+    pub fn mrbrs_intern(
+        mrb: *mut mrb_state,
+        p: *const ::std::os::raw::c_char,
+        len: size_t,
+    ) -> mrb_value;
+}
+extern "C" {
+    pub fn mrbrs_intern_static(
+        mrb: *mut mrb_state,
+        p: *const ::std::os::raw::c_char,
+        len: size_t,
+    ) -> mrb_value;
+}
+extern "C" {
     pub fn mrbrs_hash_new(mrb: *mut mrb_state) -> mrb_value;
 }
 extern "C" {

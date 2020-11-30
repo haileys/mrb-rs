@@ -262,6 +262,30 @@ mrbrs_str_new_static(mrb_state* mrb, const char* p, size_t len)
 }
 
 mrb_value
+mrbrs_intern(mrb_state* mrb, const char* p, size_t len)
+{
+    mrb_value result = mrb_nil_value();
+
+    PROTECT({
+        result = mrb_symbol_value(mrb_intern(mrb, p, len));
+    }, {});
+
+    return result;
+}
+
+mrb_value
+mrbrs_intern_static(mrb_state* mrb, const char* p, size_t len)
+{
+    mrb_value result = mrb_nil_value();
+
+    PROTECT({
+        result = mrb_symbol_value(mrb_intern_static(mrb, p, len));
+    }, {});
+
+    return result;
+}
+
+mrb_value
 mrbrs_hash_new(mrb_state* mrb)
 {
     mrb_value result = mrb_nil_value();

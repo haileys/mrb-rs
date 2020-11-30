@@ -52,6 +52,12 @@ mrb_value
 mrbrs_str_new_static(mrb_state* mrb, const char* p, size_t len);
 
 mrb_value
+mrbrs_intern(mrb_state* mrb, const char* p, size_t len);
+
+mrb_value
+mrbrs_intern_static(mrb_state* mrb, const char* p, size_t len);
+
+mrb_value
 mrbrs_hash_new(mrb_state* mrb);
 
 void

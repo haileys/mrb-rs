@@ -144,6 +144,30 @@ impl<'mrb> Context<'mrb> {
         Ok(unsafe { MrbValue::new(result) })
     }
 
+    pub fn intern(&self, string: &str) -> MrbResult<'mrb, MrbValue<'mrb>> {
+        let result = self.boundary(|| unsafe {
+            sys::mrbrs_intern(
+                self.mrb,
+                string.as_ptr() as *const i8,
+                string.len().try_into().unwrap(),
+            )
+        })?;
+
+        Ok(unsafe { MrbValue::new(result) })
+    }
+
+    pub fn intern_static(&self, string: &'static str) -> MrbResult<'mrb, MrbValue<'mrb>> {
+        let result = self.boundary(|| unsafe {
+            sys::mrbrs_intern_static(
+                self.mrb,
+                string.as_ptr() as *const i8,
+                string.len().try_into().unwrap(),
+            )
+        })?;
+
+        Ok(unsafe { MrbValue::new(result) })
+    }
+
     pub fn new_hash(&self) -> MrbResult<'mrb, MrbValue<'mrb>> {
         let result = self.boundary(|| unsafe {
             sys::mrbrs_hash_new(self.mrb)
@@ -225,6 +249,19 @@ mod tests {
 
             let s = mrb.new_string_static("A static string").unwrap();
             assert_eq!("\"A static string\"", mrb.inspect(s).to_string());
+        })
+    }
+
+    #[test]
+    fn test_symbol() {
+        let mut mrb = Mrb::open();
+
+        mrb.context(|mrb| {
+            let s = mrb.intern("hello").unwrap();
+            assert_eq!(":hello", mrb.inspect(s).to_string());
+
+            let s = mrb.intern_static("world").unwrap();
+            assert_eq!(":world", mrb.inspect(s).to_string());
         })
     }
 
