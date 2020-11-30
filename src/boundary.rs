@@ -17,14 +17,15 @@ pub unsafe fn into_mruby<'mrb, R>(mrb: *mut mrb_state, f: impl FnOnce() -> R) ->
     let mut panic_info: PanicSlot = None;
 
     // install pointer to panic_info in mrb_state's user data field
-    let mut prev_ud = &mut panic_info as *mut PanicSlot as *mut c_void;
-    mem::swap(&mut prev_ud, &mut (*mrb).ud);
+    let ud = (*mrb).ud as *mut mrb_sys::mrbrs_ud;
+    let mut prev_panic_info = &mut panic_info as *mut PanicSlot as *mut c_void;
+    mem::swap(&mut prev_panic_info, &mut (*ud).panic_info);
 
     // call into mruby
     let result = f();
 
     // restore previous panic_info pointer if exists
-    mem::swap(&mut prev_ud, &mut (*mrb).ud);
+    mem::swap(&mut prev_panic_info, &mut (*ud).panic_info);
 
     // check for panic and resume unwind if necessary
     if let Some(panic_info) = panic_info {
@@ -44,7 +45,9 @@ pub unsafe fn into_mruby<'mrb, R>(mrb: *mut mrb_state, f: impl FnOnce() -> R) ->
 
 /// Safety takes raw pointer
 pub unsafe fn into_rust<R>(mrb: *mut mrb_state, f: impl FnOnce() -> R + UnwindSafe) -> Result<R, ()> {
-    let mut panic_slot = match NonNull::new((*mrb).ud as *mut PanicSlot) {
+    let ud = &mut *((*mrb).ud as *mut mrb_sys::mrbrs_ud);
+
+    let mut panic_slot = match NonNull::new((*ud).panic_info as *mut PanicSlot) {
         Some(slot) => slot,
         None => {
             eprintln!("*** No Rust panic handler installed in MRuby context! Cannot unwind, aborting");
