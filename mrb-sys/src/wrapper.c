@@ -3,6 +3,19 @@
 
 #include "wrapper.h"
 
+#define PROTECT(body, rescue) do { \
+        struct mrb_jmpbuf jmp; \
+        struct mrb_jmpbuf* prev_jmp = mrb->jmp; \
+        MRB_TRY(&jmp) { \
+            mrb->jmp = &jmp; \
+            body \
+            mrb->jmp = prev_jmp; \
+        } MRB_CATCH(&jmp) { \
+            mrb->jmp = prev_jmp; \
+            rescue \
+        } MRB_END_EXC(&jmp); \
+    } while (0)
+
 mrb_state*
 mrbrs_open_core()
 {
@@ -86,18 +99,12 @@ mrbrs_obj_value(void* ptr)
 struct RClass*
 mrbrs_define_class(mrb_state* mrb, const char* name, struct RClass* superclass)
 {
-    struct mrb_jmpbuf* prev_jmp = mrb->jmp;
-    struct mrb_jmpbuf jmp;
     struct RClass* result = NULL;
 
-    MRB_TRY(&jmp) {
-        mrb->jmp = &jmp;
+    PROTECT({
         result = mrb_define_class(mrb, name, superclass);
         mrb_gc_protect(mrb, mrb_obj_value(result));
-        mrb->jmp = prev_jmp;
-    } MRB_CATCH(&jmp) {
-        mrb->jmp = prev_jmp;
-    } MRB_END_EXC(&jmp);
+    }, {});
 
     return result;
 }
@@ -175,13 +182,9 @@ boxed_func_dispatch(mrb_state* mrb, mrb_value self)
 struct RProc*
 mrbrs_method_make_boxed_func(mrb_state* mrb, void* boxed_func)
 {
-    struct mrb_jmpbuf* prev_jmp = mrb->jmp;
-    struct mrb_jmpbuf jmp;
     struct RProc* result = NULL;
 
-    MRB_TRY(&jmp) {
-        mrb->jmp = &jmp;
-
+    PROTECT({
         struct mrb_value data =
             mrb_obj_value(
                 mrb_data_object_alloc(
@@ -199,11 +202,7 @@ mrbrs_method_make_boxed_func(mrb_state* mrb, void* boxed_func)
             &data);
 
         mrb_gc_protect(mrb, mrb_obj_value(result));
-
-        mrb->jmp = prev_jmp;
-    } MRB_CATCH(&jmp) {
-        mrb->jmp = prev_jmp;
-    } MRB_END_EXC(&jmp);
+    }, {});
 
     return result;
 }
@@ -211,45 +210,29 @@ mrbrs_method_make_boxed_func(mrb_state* mrb, void* boxed_func)
 void
 mrbrs_define_method_proc(mrb_state* mrb, struct RClass* klass, const char* name, struct RProc* proc)
 {
-    struct mrb_jmpbuf* prev_jmp = mrb->jmp;
-    struct mrb_jmpbuf jmp;
-
-    MRB_TRY(&jmp) {
-        mrb->jmp = &jmp;
-
+    PROTECT({
         mrb_sym mid = mrb_intern_cstr(mrb, name);
 
         mrb_method_t m;
         MRB_METHOD_FROM_PROC(m, proc);
         mrb_define_method_raw(mrb, klass, mid, m);
-
-        mrb->jmp = prev_jmp;
-    } MRB_CATCH(&jmp) {
-        mrb->jmp = prev_jmp;
-    } MRB_END_EXC(&jmp);
+    }, {});
 }
 
 mrb_value
 mrbrs_load_nstring(mrb_state* mrb, const char* s, size_t len)
 {
-    struct mrb_jmpbuf* prev_jmp = mrb->jmp;
-    struct mrb_jmpbuf jmp;
     mrb_value result = mrb_nil_value();
 
     int ai = mrb_gc_arena_save(mrb);
 
-    MRB_TRY(&jmp) {
-        mrb->jmp = &jmp;
-
+    PROTECT({
         result = mrb_load_nstring(mrb, s, len);
         mrb_gc_arena_restore(mrb, ai);
         mrb_gc_protect(mrb, result);
-
-        mrb->jmp = prev_jmp;
-    } MRB_CATCH(&jmp) {
+    }, {
         mrb_gc_arena_restore(mrb, ai);
-        mrb->jmp = prev_jmp;
-    } MRB_END_EXC(&jmp);
+    });
 
     return result;
 }
@@ -257,17 +240,11 @@ mrbrs_load_nstring(mrb_state* mrb, const char* s, size_t len)
 mrb_value
 mrbrs_str_new(mrb_state* mrb, const char* p, size_t len)
 {
-    struct mrb_jmpbuf* prev_jmp = mrb->jmp;
-    struct mrb_jmpbuf jmp;
     mrb_value result = mrb_nil_value();
 
-    MRB_TRY(&jmp) {
-        mrb->jmp = &jmp;
+    PROTECT({
         result = mrb_str_new(mrb, p, len);
-        mrb->jmp = prev_jmp;
-    } MRB_CATCH(&jmp) {
-        mrb->jmp = prev_jmp;
-    } MRB_END_EXC(&jmp);
+    }, {});
 
     return result;
 }
@@ -275,17 +252,11 @@ mrbrs_str_new(mrb_state* mrb, const char* p, size_t len)
 mrb_value
 mrbrs_str_new_static(mrb_state* mrb, const char* p, size_t len)
 {
-    struct mrb_jmpbuf* prev_jmp = mrb->jmp;
-    struct mrb_jmpbuf jmp;
     mrb_value result = mrb_nil_value();
 
-    MRB_TRY(&jmp) {
-        mrb->jmp = &jmp;
+    PROTECT({
         result = mrb_str_new_static(mrb, p, len);
-        mrb->jmp = prev_jmp;
-    } MRB_CATCH(&jmp) {
-        mrb->jmp = prev_jmp;
-    } MRB_END_EXC(&jmp);
+    }, {});
 
     return result;
 }
@@ -293,17 +264,11 @@ mrbrs_str_new_static(mrb_state* mrb, const char* p, size_t len)
 mrb_value
 mrbrs_hash_new(mrb_state* mrb)
 {
-    struct mrb_jmpbuf* prev_jmp = mrb->jmp;
-    struct mrb_jmpbuf jmp;
     mrb_value result = mrb_nil_value();
 
-    MRB_TRY(&jmp) {
-        mrb->jmp = &jmp;
+    PROTECT({
         result = mrb_hash_new(mrb);
-        mrb->jmp = prev_jmp;
-    } MRB_CATCH(&jmp) {
-        mrb->jmp = prev_jmp;
-    } MRB_END_EXC(&jmp);
+    }, {});
 
     return result;
 }
@@ -311,14 +276,7 @@ mrbrs_hash_new(mrb_state* mrb)
 void
 mrbrs_hash_set(mrb_state* mrb, mrb_value hash, mrb_value key, mrb_value value)
 {
-    struct mrb_jmpbuf* prev_jmp = mrb->jmp;
-    struct mrb_jmpbuf jmp;
-
-    MRB_TRY(&jmp) {
-        mrb->jmp = &jmp;
+    PROTECT({
         mrb_hash_set(mrb, hash, key, value);
-        mrb->jmp = prev_jmp;
-    } MRB_CATCH(&jmp) {
-        mrb->jmp = prev_jmp;
-    } MRB_END_EXC(&jmp);
+    }, {});
 }
