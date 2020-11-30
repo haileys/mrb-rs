@@ -289,3 +289,36 @@ mrbrs_str_new_static(mrb_state* mrb, const char* p, size_t len)
 
     return result;
 }
+
+mrb_value
+mrbrs_hash_new(mrb_state* mrb)
+{
+    struct mrb_jmpbuf* prev_jmp = mrb->jmp;
+    struct mrb_jmpbuf jmp;
+    mrb_value result = mrb_nil_value();
+
+    MRB_TRY(&jmp) {
+        mrb->jmp = &jmp;
+        result = mrb_hash_new(mrb);
+        mrb->jmp = prev_jmp;
+    } MRB_CATCH(&jmp) {
+        mrb->jmp = prev_jmp;
+    } MRB_END_EXC(&jmp);
+
+    return result;
+}
+
+void
+mrbrs_hash_set(mrb_state* mrb, mrb_value hash, mrb_value key, mrb_value value)
+{
+    struct mrb_jmpbuf* prev_jmp = mrb->jmp;
+    struct mrb_jmpbuf jmp;
+
+    MRB_TRY(&jmp) {
+        mrb->jmp = &jmp;
+        mrb_hash_set(mrb, hash, key, value);
+        mrb->jmp = prev_jmp;
+    } MRB_CATCH(&jmp) {
+        mrb->jmp = prev_jmp;
+    } MRB_END_EXC(&jmp);
+}

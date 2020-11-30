@@ -143,6 +143,20 @@ impl<'mrb> Context<'mrb> {
 
         Ok(unsafe { MrbValue::new(result) })
     }
+
+    pub fn new_hash(&self) -> MrbResult<'mrb, MrbValue<'mrb>> {
+        let result = self.boundary(|| unsafe {
+            sys::mrbrs_hash_new(self.mrb)
+        })?;
+
+        Ok(unsafe { MrbValue::new(result) })
+    }
+
+    pub fn hash_set(&self, hash: MrbValue<'mrb>, key: MrbValue<'mrb>, value: MrbValue<'mrb>) -> MrbResult<'mrb, ()> {
+        self.boundary(|| unsafe {
+            sys::mrbrs_hash_set(self.mrb, hash.as_raw(), key.as_raw(), value.as_raw());
+        })
+    }
 }
 
 #[cfg(test)]
@@ -196,7 +210,7 @@ mod tests {
     }
 
     #[test]
-    fn test_new_string() {
+    fn test_string() {
         let mut mrb = Mrb::open();
 
         mrb.context(|mrb| {
@@ -205,6 +219,22 @@ mod tests {
 
             let s = mrb.new_string_static("A static string").unwrap();
             assert_eq!("\"A static string\"", mrb.inspect(s).to_string());
+        })
+    }
+
+    #[test]
+    fn test_hash() {
+        let mut mrb = Mrb::open();
+
+        mrb.context(|mrb| {
+            let hash = mrb.new_hash().unwrap();
+            assert_eq!("{}", mrb.inspect(hash).to_string());
+
+            mrb.hash_set(hash, mrb.new_string("A").unwrap(), mrb.new_string("B").unwrap()).unwrap();
+            assert_eq!("{\"A\"=>\"B\"}", mrb.inspect(hash).to_string());
+
+            mrb.hash_set(hash, mrb.new_string("C").unwrap(), mrb.new_string("D").unwrap()).unwrap();
+            assert_eq!("{\"A\"=>\"B\", \"C\"=>\"D\"}", mrb.inspect(hash).to_string());
         })
     }
 }

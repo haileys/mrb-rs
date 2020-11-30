@@ -2,6 +2,7 @@
 #include <mruby/class.h>
 #include <mruby/data.h>
 #include <mruby/error.h>
+#include <mruby/hash.h>
 #include <mruby/proc.h>
 #include <mruby/string.h>
 #include <mruby/throw.h>
@@ -47,3 +48,9 @@ mrbrs_str_new(mrb_state* mrb, const char* p, size_t len);
 
 mrb_value
 mrbrs_str_new_static(mrb_state* mrb, const char* p, size_t len);
+
+mrb_value
+mrbrs_hash_new(mrb_state* mrb);
+
+void
+mrbrs_hash_set(mrb_state* mrb, mrb_value hash, mrb_value key, mrb_value value);

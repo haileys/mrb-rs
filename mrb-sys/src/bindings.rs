@@ -511,6 +511,8 @@ pub const MRB_FL_CLASS_IS_PREPENDED: u32 = 524288;
 pub const MRB_FL_CLASS_IS_ORIGIN: u32 = 262144;
 pub const MRB_FL_CLASS_IS_INHERITED: u32 = 131072;
 pub const MRB_INSTANCE_TT_MASK: u32 = 255;
+pub const MRB_HASH_DEFAULT: u32 = 1;
+pub const MRB_HASH_PROC_DEFAULT: u32 = 2;
 pub const STR_FUNC_PARSING: u32 = 1;
 pub const STR_FUNC_EXPAND: u32 = 2;
 pub const STR_FUNC_REGEXP: u32 = 4;
@@ -4804,6 +4806,188 @@ extern "C" {
 }
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
+pub struct RHash {
+    pub c: *mut RClass,
+    pub gcnext: *mut RBasic,
+    pub _bitfield_1: __BindgenBitfieldUnit<[u8; 4usize], u32>,
+    pub iv: *mut iv_tbl,
+    pub ht: *mut htable,
+}
+#[test]
+fn bindgen_test_layout_RHash() {
+    assert_eq!(
+        ::std::mem::size_of::<RHash>(),
+        40usize,
+        concat!("Size of: ", stringify!(RHash))
+    );
+    assert_eq!(
+        ::std::mem::align_of::<RHash>(),
+        8usize,
+        concat!("Alignment of ", stringify!(RHash))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<RHash>())).c as *const _ as usize },
+        0usize,
+        concat!("Offset of field: ", stringify!(RHash), "::", stringify!(c))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<RHash>())).gcnext as *const _ as usize },
+        8usize,
+        concat!(
+            "Offset of field: ",
+            stringify!(RHash),
+            "::",
+            stringify!(gcnext)
+        )
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<RHash>())).iv as *const _ as usize },
+        24usize,
+        concat!("Offset of field: ", stringify!(RHash), "::", stringify!(iv))
+    );
+    assert_eq!(
+        unsafe { &(*(::std::ptr::null::<RHash>())).ht as *const _ as usize },
+        32usize,
+        concat!("Offset of field: ", stringify!(RHash), "::", stringify!(ht))
+    );
+}
+impl RHash {
+    #[inline]
+    pub fn tt(&self) -> mrb_vtype {
+        unsafe { ::std::mem::transmute(self._bitfield_1.get(0usize, 8u8) as u32) }
+    }
+    #[inline]
+    pub fn set_tt(&mut self, val: mrb_vtype) {
+        unsafe {
+            let val: u32 = ::std::mem::transmute(val);
+            self._bitfield_1.set(0usize, 8u8, val as u64)
+        }
+    }
+    #[inline]
+    pub fn color(&self) -> u32 {
+        unsafe { ::std::mem::transmute(self._bitfield_1.get(8usize, 3u8) as u32) }
+    }
+    #[inline]
+    pub fn set_color(&mut self, val: u32) {
+        unsafe {
+            let val: u32 = ::std::mem::transmute(val);
+            self._bitfield_1.set(8usize, 3u8, val as u64)
+        }
+    }
+    #[inline]
+    pub fn flags(&self) -> u32 {
+        unsafe { ::std::mem::transmute(self._bitfield_1.get(11usize, 21u8) as u32) }
+    }
+    #[inline]
+    pub fn set_flags(&mut self, val: u32) {
+        unsafe {
+            let val: u32 = ::std::mem::transmute(val);
+            self._bitfield_1.set(11usize, 21u8, val as u64)
+        }
+    }
+    #[inline]
+    pub fn new_bitfield_1(
+        tt: mrb_vtype,
+        color: u32,
+        flags: u32,
+    ) -> __BindgenBitfieldUnit<[u8; 4usize], u32> {
+        let mut __bindgen_bitfield_unit: __BindgenBitfieldUnit<[u8; 4usize], u32> =
+            Default::default();
+        __bindgen_bitfield_unit.set(0usize, 8u8, {
+            let tt: u32 = unsafe { ::std::mem::transmute(tt) };
+            tt as u64
+        });
+        __bindgen_bitfield_unit.set(8usize, 3u8, {
+            let color: u32 = unsafe { ::std::mem::transmute(color) };
+            color as u64
+        });
+        __bindgen_bitfield_unit.set(11usize, 21u8, {
+            let flags: u32 = unsafe { ::std::mem::transmute(flags) };
+            flags as u64
+        });
+        __bindgen_bitfield_unit
+    }
+}
+extern "C" {
+    pub fn mrb_hash_new_capa(mrb: *mut mrb_state, capa: mrb_int) -> mrb_value;
+}
+extern "C" {
+    pub fn mrb_ensure_hash_type(mrb: *mut mrb_state, hash: mrb_value) -> mrb_value;
+}
+extern "C" {
+    pub fn mrb_check_hash_type(mrb: *mut mrb_state, hash: mrb_value) -> mrb_value;
+}
+extern "C" {
+    pub fn mrb_hash_new(mrb: *mut mrb_state) -> mrb_value;
+}
+extern "C" {
+    pub fn mrb_hash_set(mrb: *mut mrb_state, hash: mrb_value, key: mrb_value, val: mrb_value);
+}
+extern "C" {
+    pub fn mrb_hash_get(mrb: *mut mrb_state, hash: mrb_value, key: mrb_value) -> mrb_value;
+}
+extern "C" {
+    pub fn mrb_hash_fetch(
+        mrb: *mut mrb_state,
+        hash: mrb_value,
+        key: mrb_value,
+        def: mrb_value,
+    ) -> mrb_value;
+}
+extern "C" {
+    pub fn mrb_hash_delete_key(mrb: *mut mrb_state, hash: mrb_value, key: mrb_value) -> mrb_value;
+}
+extern "C" {
+    pub fn mrb_hash_keys(mrb: *mut mrb_state, hash: mrb_value) -> mrb_value;
+}
+extern "C" {
+    pub fn mrb_hash_key_p(mrb: *mut mrb_state, hash: mrb_value, key: mrb_value) -> mrb_bool;
+}
+extern "C" {
+    pub fn mrb_hash_empty_p(mrb: *mut mrb_state, self_: mrb_value) -> mrb_bool;
+}
+extern "C" {
+    pub fn mrb_hash_values(mrb: *mut mrb_state, hash: mrb_value) -> mrb_value;
+}
+extern "C" {
+    pub fn mrb_hash_clear(mrb: *mut mrb_state, hash: mrb_value) -> mrb_value;
+}
+extern "C" {
+    pub fn mrb_hash_size(mrb: *mut mrb_state, hash: mrb_value) -> mrb_int;
+}
+extern "C" {
+    pub fn mrb_hash_dup(mrb: *mut mrb_state, hash: mrb_value) -> mrb_value;
+}
+extern "C" {
+    pub fn mrb_hash_merge(mrb: *mut mrb_state, hash1: mrb_value, hash2: mrb_value);
+}
+extern "C" {
+    pub fn mrb_gc_mark_hash(arg1: *mut mrb_state, arg2: *mut RHash);
+}
+extern "C" {
+    pub fn mrb_gc_mark_hash_size(arg1: *mut mrb_state, arg2: *mut RHash) -> size_t;
+}
+extern "C" {
+    pub fn mrb_gc_free_hash(arg1: *mut mrb_state, arg2: *mut RHash);
+}
+pub type mrb_hash_foreach_func = ::std::option::Option<
+    unsafe extern "C" fn(
+        mrb: *mut mrb_state,
+        key: mrb_value,
+        val: mrb_value,
+        data: *mut ::std::os::raw::c_void,
+    ) -> ::std::os::raw::c_int,
+>;
+extern "C" {
+    pub fn mrb_hash_foreach(
+        mrb: *mut mrb_state,
+        hash: *mut RHash,
+        func: mrb_hash_foreach_func,
+        p: *mut ::std::os::raw::c_void,
+    );
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
 pub struct mrbc_context {
     pub syms: *mut mrb_sym,
     pub slen: ::std::os::raw::c_int,
@@ -7858,6 +8042,12 @@ extern "C" {
         len: size_t,
     ) -> mrb_value;
 }
+extern "C" {
+    pub fn mrbrs_hash_new(mrb: *mut mrb_state) -> mrb_value;
+}
+extern "C" {
+    pub fn mrbrs_hash_set(mrb: *mut mrb_state, hash: mrb_value, key: mrb_value, value: mrb_value);
+}
 pub type __builtin_va_list = [__va_list_tag; 1usize];
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
@@ -7928,6 +8118,11 @@ pub struct iv_tbl {
 #[repr(C)]
 #[derive(Debug, Copy, Clone)]
 pub struct symbol_name {
+    pub _address: u8,
+}
+#[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct htable {
     pub _address: u8,
 }
 #[repr(C)]
