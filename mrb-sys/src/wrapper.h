@@ -1,3 +1,5 @@
+#include <stdbool.h>
+
 #include <mruby.h>
 #include <mruby/class.h>
 #include <mruby/data.h>
@@ -54,3 +56,6 @@ mrbrs_hash_new(mrb_state* mrb);
 
 void
 mrbrs_hash_set(mrb_state* mrb, mrb_value hash, mrb_value key, mrb_value value);
+
+bool
+mrbrs_equal(mrb_state* mrb, mrb_value a, mrb_value b);

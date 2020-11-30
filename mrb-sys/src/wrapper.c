@@ -280,3 +280,15 @@ mrbrs_hash_set(mrb_state* mrb, mrb_value hash, mrb_value key, mrb_value value)
         mrb_hash_set(mrb, hash, key, value);
     }, {});
 }
+
+bool
+mrbrs_equal(mrb_state* mrb, mrb_value a, mrb_value b)
+{
+    bool result = false;
+
+    PROTECT({
+        result = mrb_equal(mrb, a, b);
+    }, {});
+
+    return result;
+}

@@ -157,6 +157,12 @@ impl<'mrb> Context<'mrb> {
             sys::mrbrs_hash_set(self.mrb, hash.as_raw(), key.as_raw(), value.as_raw());
         })
     }
+
+    pub fn equal(&self, a: MrbValue<'mrb>, b: MrbValue<'mrb>) -> MrbResult<'mrb, bool> {
+        self.boundary(|| unsafe {
+            sys::mrbrs_equal(self.mrb, a.as_raw(), b.as_raw())
+        })
+    }
 }
 
 #[cfg(test)]
@@ -235,6 +241,20 @@ mod tests {
 
             mrb.hash_set(hash, mrb.new_string("C").unwrap(), mrb.new_string("D").unwrap()).unwrap();
             assert_eq!("{\"A\"=>\"B\", \"C\"=>\"D\"}", mrb.inspect(hash).to_string());
+        })
+    }
+
+    #[test]
+    fn test_equal() {
+        let mut mrb = Mrb::open();
+
+        mrb.context(|mrb| {
+            let foo = mrb.new_string("foo").unwrap();
+            let bar = mrb.new_string("bar").unwrap();
+
+            assert!(mrb.equal(foo, foo).unwrap());
+            assert!(mrb.equal(bar, bar).unwrap());
+            assert!(!mrb.equal(foo, bar).unwrap());
         })
     }
 }

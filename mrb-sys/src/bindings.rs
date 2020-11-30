@@ -111,6 +111,9 @@ impl<T> ::std::fmt::Debug for __IncompleteArrayField<T> {
         fmt.write_str("__IncompleteArrayField")
     }
 }
+pub const true_: u32 = 1;
+pub const false_: u32 = 0;
+pub const __bool_true_false_are_defined: u32 = 1;
 pub const __GNUC_VA_LIST: u32 = 1;
 pub const _STDINT_H: u32 = 1;
 pub const _FEATURES_H: u32 = 1;
@@ -8047,6 +8050,9 @@ extern "C" {
 }
 extern "C" {
     pub fn mrbrs_hash_set(mrb: *mut mrb_state, hash: mrb_value, key: mrb_value, value: mrb_value);
+}
+extern "C" {
+    pub fn mrbrs_equal(mrb: *mut mrb_state, a: mrb_value, b: mrb_value) -> bool;
 }
 pub type __builtin_va_list = [__va_list_tag; 1usize];
 #[repr(C)]
