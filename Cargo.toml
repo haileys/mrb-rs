@@ -1,6 +1,6 @@
 [package]
 name = "mrb"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Charlie Somerville <charlie@charlie.bz>"]
 edition = "2018"
 description = "Safe, low level bindings for mruby"
@@ -10,4 +10,4 @@ repository = "https://github.com/charliesome/mrb-rs"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-mrb-sys = { version = "0.1.0", path = "mrb-sys" }
+mrb-sys = { version = "0.1.1", path = "mrb-sys" }
