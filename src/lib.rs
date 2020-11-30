@@ -119,11 +119,41 @@ impl<'mrb> Context<'mrb> {
 
         Ok(unsafe { MrbValue::new(result) })
     }
+
+    pub fn new_string(&self, string: &str) -> MrbResult<'mrb, MrbValue<'mrb>> {
+        let result = self.boundary(|| unsafe {
+            sys::mrbrs_str_new(
+                self.mrb,
+                string.as_ptr() as *const i8,
+                string.len().try_into().unwrap(),
+            )
+        })?;
+
+        Ok(unsafe { MrbValue::new(result) })
+    }
+
+    pub fn new_string_static(&self, string: &'static str) -> MrbResult<'mrb, MrbValue<'mrb>> {
+        let result = self.boundary(|| unsafe {
+            sys::mrbrs_str_new_static(
+                self.mrb,
+                string.as_ptr() as *const i8,
+                string.len().try_into().unwrap(),
+            )
+        })?;
+
+        Ok(unsafe { MrbValue::new(result) })
+    }
 }
 
 #[cfg(test)]
 mod tests {
-    use crate::Mrb;
+    use crate::{Mrb, Context};
+
+    fn eval(mrb: &Context, code: &str) -> Result<String, String> {
+        mrb.load_string(code)
+            .map(|val| mrb.inspect(val).to_string())
+            .map_err(|err| format!("{:?}", err))
+    }
 
     #[test]
     fn test_open_close() {
@@ -159,15 +189,22 @@ mod tests {
         let mut mrb = Mrb::open();
 
         mrb.context(|mrb| {
-            let eval = |code: &str| -> Result<String, String> {
-                mrb.load_string(code)
-                    .map(|val| mrb.inspect(val).to_string())
-                    .map_err(|err| format!("{:?}", err))
-            };
-
-            assert_eq!("3", eval("1 + 2").unwrap());
-            assert_eq!("hello (RuntimeError)", eval("raise 'hello'").unwrap_err());
-            assert_eq!("syntax error (SyntaxError)", eval("$%^&#$W").unwrap_err());
+            assert_eq!("3", eval(mrb, "1 + 2").unwrap());
+            assert_eq!("hello (RuntimeError)", eval(mrb, "raise 'hello'").unwrap_err());
+            assert_eq!("syntax error (SyntaxError)", eval(mrb, "$%^&#$W").unwrap_err());
         });
+    }
+
+    #[test]
+    fn test_new_string() {
+        let mut mrb = Mrb::open();
+
+        mrb.context(|mrb| {
+            let s = mrb.new_string("Hello world!").unwrap();
+            assert_eq!("\"Hello world!\"", mrb.inspect(s).to_string());
+
+            let s = mrb.new_string_static("A static string").unwrap();
+            assert_eq!("\"A static string\"", mrb.inspect(s).to_string());
+        })
     }
 }

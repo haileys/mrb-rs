@@ -253,3 +253,39 @@ mrbrs_load_nstring(mrb_state* mrb, const char* s, size_t len)
 
     return result;
 }
+
+mrb_value
+mrbrs_str_new(mrb_state* mrb, const char* p, size_t len)
+{
+    struct mrb_jmpbuf* prev_jmp = mrb->jmp;
+    struct mrb_jmpbuf jmp;
+    mrb_value result = mrb_nil_value();
+
+    MRB_TRY(&jmp) {
+        mrb->jmp = &jmp;
+        result = mrb_str_new(mrb, p, len);
+        mrb->jmp = prev_jmp;
+    } MRB_CATCH(&jmp) {
+        mrb->jmp = prev_jmp;
+    } MRB_END_EXC(&jmp);
+
+    return result;
+}
+
+mrb_value
+mrbrs_str_new_static(mrb_state* mrb, const char* p, size_t len)
+{
+    struct mrb_jmpbuf* prev_jmp = mrb->jmp;
+    struct mrb_jmpbuf jmp;
+    mrb_value result = mrb_nil_value();
+
+    MRB_TRY(&jmp) {
+        mrb->jmp = &jmp;
+        result = mrb_str_new_static(mrb, p, len);
+        mrb->jmp = prev_jmp;
+    } MRB_CATCH(&jmp) {
+        mrb->jmp = prev_jmp;
+    } MRB_END_EXC(&jmp);
+
+    return result;
+}

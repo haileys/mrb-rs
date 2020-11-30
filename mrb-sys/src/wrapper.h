@@ -41,3 +41,9 @@ mrbrs_define_method_proc(mrb_state* mrb, struct RClass* klass, const char* name,
 
 mrb_value
 mrbrs_load_nstring(mrb_state* mrb, const char* s, size_t len);
+
+mrb_value
+mrbrs_str_new(mrb_state* mrb, const char* p, size_t len);
+
+mrb_value
+mrbrs_str_new_static(mrb_state* mrb, const char* p, size_t len);
